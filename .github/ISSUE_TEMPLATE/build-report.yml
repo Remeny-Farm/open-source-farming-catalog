@@ -1,0 +1,51 @@
+name: I built this / Megépítettem
+description: Report a build of a listed design, with a photo. / Jelentés egy listázott terv megépítéséről, fotóval.
+title: "[build] "
+labels: ["submission", "build-report"]
+body:
+  - type: input
+    id: project
+    attributes:
+      label: Project id / Projektazonosító
+      description: The directory name under projects/, e.g. tin-can-cigarette-butt-collector.
+    validations:
+      required: true
+  - type: input
+    id: date
+    attributes:
+      label: Date built / Építés dátuma
+      placeholder: "2026-10-01"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version you built / Megépített verzió
+      description: As shown on the project's page or in project.json. / Ahogy a projekt oldalán vagy a project.json-ban szerepel.
+  - type: textarea
+    id: notes
+    attributes:
+      label: What happened / Mi történt
+      description: Printer or tools, material, what fit and what did not, what you changed. / Nyomtató vagy szerszámok, anyag, mi illeszkedett és mi nem, mit változtattál.
+    validations:
+      required: true
+  - type: textarea
+    id: photo
+    attributes:
+      label: Photo / Fotó
+      description: Drag a photo of your build here (at least 1200 px wide). / Húzd ide a fotót (legalább 1200 px széles).
+    validations:
+      required: true
+  - type: input
+    id: credit
+    attributes:
+      label: Name to credit / Feltüntetendő név
+    validations:
+      required: true
+  - type: checkboxes
+    id: rights
+    attributes:
+      label: Rights / Jogok
+      options:
+        - label: The photo is mine and may be published under CC BY-SA 4.0 with the name above. / A fotó az enyém, és a fenti névvel CC BY-SA 4.0 alatt közzétehető.
+          required: true

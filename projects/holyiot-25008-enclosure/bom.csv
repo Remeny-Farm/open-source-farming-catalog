@@ -1,0 +1,7 @@
+ref,qty,item_hu,item_en,source,notes
+BODY,1,Ház (átlátszó PETG nyomtatás),Body (transparent PETG print),source/cad/out/body.stl,2.71 g modelled
+CAP,1,Kupak (átlátszó PETG nyomtatás),Cap (transparent PETG print),source/cad/out/cap.stl,2.30 g modelled
+PCB,1,Holyiot 25008 modul CR2032-tartóval,Holyiot 25008 module with CR2032 holder,,nRF54L15 + LIS2DH12; electronics are not part of this project
+CELL,1,CR2032 gombelem,CR2032 coin cell,,
+ORING,1,"NBR O-gyűrű, belső átmérő 26,74 × keresztmetszet 1,50 mm","NBR O-ring, ID 26.74 × CS 1.50 mm",,radial seal; sourcing a stock size is still open (see source/docs/requirements.md)
+ELASTIC,1,Gumis nyolcas hám,Figure-eight elastic harness,,tab slot cut 8.8 × 1.8 mm on an assumption; not verified

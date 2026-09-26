@@ -1,0 +1,41 @@
+name: Fix an existing design / Meglévő terv javítása
+description: Translation, corrected limitation, stage update with evidence, new file version or photo. / Fordítás, pontosított korlát, állapotfrissítés bizonyítékkal, új fájlverzió vagy fotó.
+title: "[fix] "
+labels: ["submission", "fix"]
+body:
+  - type: input
+    id: project
+    attributes:
+      label: Project id / Projektazonosító
+      description: The directory name under projects/, e.g. holyiot-25008-enclosure.
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of change / Milyen változtatás
+      multiple: true
+      options: [translation, limitations, stage, files, photo, links, bill of materials, other]
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: The change / A változtatás
+      description: Say exactly what should read differently, or attach the new files. / Írd le pontosan, minek kell másképp szerepelnie, vagy csatold az új fájlokat.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Why, with evidence / Miért, bizonyítékkal
+      description: A stage change needs a photo, measurement or report. / Állapotváltáshoz fotó, mérés vagy jelentés kell.
+    validations:
+      required: true
+  - type: checkboxes
+    id: rights
+    attributes:
+      label: Rights / Jogok
+      options:
+        - label: Anything I attach is mine or already under a licence that allows this publication, and may be published under the project's licences. / Amit csatolok, az az enyém vagy megengedő licenc alatt áll, és a projekt licencei alatt közzétehető.
+          required: true

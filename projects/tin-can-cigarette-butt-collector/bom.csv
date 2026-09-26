@@ -1,0 +1,4 @@
+ref,qty,item_hu,item_en,source,notes
+LID,1,Nyomtatott tető,Printed lid,export/tin-can-cigarette-butt-collector.stl,bounding box 172 × 194 × 178 mm; filament type of the built example not recorded
+CAN,1,Konzervdoboz (fedél nélkül),Tin can (lid removed),,fit tried only on the can in the photo
+MOUNT,1,Rögzítés (csavar vagy pánt),Mounting (screw or strap),,depends on the post; not part of the design

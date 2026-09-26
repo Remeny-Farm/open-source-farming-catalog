@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "id": "tin-can-cigarette-butt-collector",
+  "title": {
+    "hu": "Konzervdobozos csikkgyűjtő",
+    "en": "Tin can cigarette butt collector"
+  },
+  "description": {
+    "hu": "3D nyomtatott rátét, amely egy konzervdobozt kültéri csikkgyűjtővé alakít. A csikkek a fém dobozba esnek, így a parázs nem éri a műanyagot.",
+    "en": "A 3D-printed adapter that turns a tin can into an outdoor cigarette butt bin. Butts fall into the metal can, keeping embers off the plastic."
+  },
+  "category": "mechanical",
+  "stage": "field-tested",
+  "version": "2026-09-23",
+  "topics": ["tools"],
+  "requires": ["3d-printer"],
+  "maintainers": [
+    { "name": "Remény Farm", "url": "https://github.com/Remeny-Farm" }
+  ],
+  "licenses": [
+    { "identifier": "CC-BY-SA-4.0" }
+  ],
+  "files": [
+    { "path": "export/tin-can-cigarette-butt-collector.stl", "sha256": "48d377e8399c4d591de4d57cce3c0a0dd9172bc4443cc6582958cb488652dfc4", "role": "export" }
+  ],
+  "links": [
+    { "kind": "printables", "url": "https://www.printables.com/model/1852082-tin-can-cigarette-butt-collector" }
+  ],
+  "photo": {
+    "src": "photos/tin-can-cigarette-butt-collector-1200.webp",
+    "width": 1200,
+    "height": 900,
+    "alt": {
+      "hu": "A csikkgyűjtő rozsdás konzervdobozon, fekete nyomtatott tetővel és cigarettajellel, fa oszlopra szerelve a szabadban.",
+      "en": "The collector on a rusty tin can, with the black printed lid and cigarette symbol, mounted on a wooden post outdoors."
+    }
+  },
+  "limitations": {
+    "hu": "A nyomtatott rész éghető: a csikket bedobás előtt el kell nyomni. Csak STL érhető el, szerkeszthető forrás nincs. Terhelési és időjárásállósági próba nem történt.",
+    "en": "The printed part is flammable: extinguish butts before disposal. Only an STL is available, no editable source. No load or weathering tests have been done."
+  }
+}

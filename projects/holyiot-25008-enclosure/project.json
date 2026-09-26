@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 2,
+  "id": "holyiot-25008-enclosure",
+  "title": {
+    "hu": "Holyiot 25008 tok (nRF54L15, CR2032)",
+    "en": "Holyiot 25008 enclosure (nRF54L15, CR2032)"
+  },
+  "description": {
+    "hu": "Átlátszó PETG tok a Holyiot 25008 nRF54L15 BLE modulhoz és egy CR2032 elemhez. Bajonettzáras kupak, támasz nélkül nyomtatható. Parametrikus build123d forrás, gépi ellenőrzéssel és laborjegyzetekkel.",
+    "en": "Clear PETG enclosure for the Holyiot 25008 nRF54L15 BLE module with a CR2032 cell. Bayonet cap, prints without supports. Parametric build123d source with machine checks and lab notes."
+  },
+  "category": "mechanical",
+  "stage": "built",
+  "version": "rev-c",
+  "topics": ["poultry", "sensors"],
+  "requires": ["3d-printer"],
+  "maintainers": [
+    { "name": "Remény Farm", "url": "https://github.com/Remeny-Farm" }
+  ],
+  "licenses": [
+    { "path": "source", "identifier": "MIT" },
+    { "identifier": "CC-BY-SA-4.0" }
+  ],
+  "files": [
+    { "path": "source/cad/out/body.stl", "sha256": "a709840125ed96c1538c0c244a05861dc98327f895b2d0db3852d245322a7c18", "role": "export" },
+    { "path": "source/cad/out/body.step", "sha256": "c8dcd4803f7437b75f3b72e1892c66c5909d8b933e5dc020c9fecdcd51e17237", "role": "export" },
+    { "path": "source/cad/out/cap.stl", "sha256": "b73a1e7bba1be71fd1e41160108518d3f6616b93658dca6019f305f2fe3cce8e", "role": "export" },
+    { "path": "source/cad/out/cap.step", "sha256": "1cd7209129534463ad1588c67a40f35bd6d4bf61bd2f3a945200b6a82f282f2e", "role": "export" },
+    { "path": "source/cad/out/coupon_body.stl", "sha256": "2c78e3c2bd827d455b4144cdfa4e8c0e896bb0a00f7e1a5b448f0d52826a5f6b", "role": "export" },
+    { "path": "source/cad/out/coupon_cap.stl", "sha256": "0d017882b83816c57dc3f49c40134d99c0b063e748a6e33a3f210c76b3cc09fd", "role": "export" },
+    { "path": "source/cad/out/hen_tag_revC_P1S.3mf", "sha256": "171ecfb984882dcc7d1e057fc50d82fb02bd1e5c4864e64ef01ba3153e43617d", "role": "export" },
+    { "path": "source/cad/hen_tag_enclosure.py", "sha256": "5e514d4a5188c478f809e2725c40d271fd7262eff8514259036fce0ff74d7c94", "role": "source" },
+    { "path": "source/cad/cap_marking.py", "sha256": "d6d97b59d2cfaf828621283421d58d2ca74d47ffed5d659970ec5ed03afa1929", "role": "source" },
+    { "path": "source/cad/verify.py", "sha256": "8e063f9253732ec04e5dae55e9317035fcd6ecdf787cfb9c8af93a0cfd26cf94", "role": "source" },
+    { "path": "source/README.md", "sha256": "083259160adffee95536d478c906ecf0fecdb645338efc490cbb276ba2bc0b31", "role": "documentation" },
+    { "path": "source/DESIGN.md", "sha256": "7168e074257ffa64529f3d50e6fe5c17de8f70a136e77ba3104f5282ffcab29e", "role": "documentation" },
+    { "path": "source/docs/requirements.md", "sha256": "371db281558f873a164c2e2e04bed74017336c93f5acb1b4c0cdee72117d036e", "role": "documentation" },
+    { "path": "source/cad/README.md", "sha256": "5976697091247255a7c70008dc913b1a6d01b90fec02e422e9d572c02d1ac33f", "role": "documentation" },
+    { "path": "source/docs/lab/2026-08-28-enclosure-board-measurements.md", "sha256": "3e96ea66f1097c2d11958c45999db62c381f73b13f08595b9cfbc3f3e2d29b26", "role": "evidence" },
+    { "path": "source/docs/lab/2026-08-28-enclosure-print-trial.md", "sha256": "5f6f72452cbf9bbc037ccffa17a7c05e1695443dac6ee4a96bf2d4017d3e2bbb", "role": "evidence" },
+    { "path": "source/docs/lab/2026-08-30-enclosure-led-window.md", "sha256": "b0655c5f051f08351315a868324fecb9ba6e9cae899720a2a0bb41bc340cc0f9", "role": "evidence" },
+    { "path": "source/docs/lab/2026-09-10-thread-print-failure.md", "sha256": "302e0a37f99a7390044bb6952b5c47e20c82973a668c4983d2007a0d321a1463", "role": "evidence" },
+    { "path": "source/docs/lab/2026-09-14-cap-batch-plate.md", "sha256": "6b7e1ce56e1f96db75556afdb303572086e48b98f64790c83a497784a8ab5645", "role": "evidence" }
+  ],
+  "links": [
+    { "kind": "printables", "url": "https://www.printables.com/model/1852118-holyiot-25008-enclosure-nrf54l15-cr2032" },
+    { "kind": "repository", "url": "https://github.com/Remeny-Farm/open-source-farming-catalog/tree/main/projects/holyiot-25008-enclosure" }
+  ],
+  "photo": {
+    "src": "photos/holyiot-25008-enclosure-1200.webp",
+    "width": 1200,
+    "height": 900,
+    "alt": {
+      "hu": "A nyitott tok: a fekete alsó részben a kék Holyiot 25008 panel, mellette az átlátszó kupak, fa asztalon.",
+      "en": "The open enclosure: the blue Holyiot 25008 board in the black base, the clear cap beside it, on a wooden table."
+    }
+  },
+  "limitations": {
+    "hu": "Az illesztési próbadarabok elkészültek, a méretek jók. A teljes zárt tokot, az O-gyűrűs tömítést és a vízállóságot még nem teszteltük. Vezető vagy szénszálas filament tilos: elhangolja az antennát, és rövidzárat okozhat.",
+    "en": "The fit coupons have been printed and the dimensions are good. The complete sealed enclosure, the O-ring seal and water resistance are untested. No conductive or carbon-fibre filament: it detunes the antenna and can cause a short."
+  }
+}

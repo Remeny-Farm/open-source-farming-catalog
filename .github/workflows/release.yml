@@ -1,0 +1,44 @@
+name: Release project bundle
+
+# Tag "<project-id>/<version>" (pushed by a maintainer) publishes an immutable zip of
+# projects/<id>/ with its sha256 as a GitHub Release. Tag names reach the shell only through
+# $GITHUB_REF_NAME, never through expression interpolation.
+on:
+  push:
+    tags: ['*/*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 26.8.2
+          cache: npm
+      - run: npm ci
+      - run: npm run validate
+      - name: Check the tag against project.json
+        run: node scripts/release-check.mjs "$GITHUB_REF_NAME" | tee -a "$GITHUB_ENV"
+      - name: Build the bundle
+        run: |
+          set -euo pipefail
+          case "$ID/$VERSION" in *..*|*' '*) echo "unsafe tag"; exit 1;; esac
+          out="$ID-$VERSION.zip"
+          (cd projects && zip -r -X "../$out" "$ID" -x "$ID/photos/originals/*")
+          sha256sum "$out" | tee "$out.sha256"
+          echo "OUT=$out" >> "$GITHUB_ENV"
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create "$GITHUB_REF_NAME" "$OUT" "$OUT.sha256" \
+            --title "$ID $VERSION" \
+            --notes "$(printf 'Immutable bundle of projects/%s at version %s.\n\nsha256: %s' "$ID" "$VERSION" "$(cut -d' ' -f1 "$OUT.sha256")")"

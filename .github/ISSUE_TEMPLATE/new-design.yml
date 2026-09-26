@@ -1,0 +1,112 @@
+name: New design / Új terv
+description: Submit a design without writing JSON. One language is enough; the reviewer adds the other. / Terv beküldése JSON-írás nélkül. Egy nyelv elég, a lektor hozzáteszi a másikat.
+title: "[design] "
+labels: ["submission", "new-design"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Only real, buildable designs with honest status. Read [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md) / [CONTRIBUTING.hu.md](../blob/main/CONTRIBUTING.hu.md) first.
+        Csak valódi, megépíthető tervek, őszinte állapottal.
+  - type: input
+    id: title
+    attributes:
+      label: Title / Cím
+      placeholder: "Tin can cigarette butt collector / Konzervdobozos csikkgyűjtő"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What it is and what problem it solves / Mi ez, és milyen problémát old meg
+      description: 2–5 sentences in Hungarian or English (both welcome). / 2–5 mondat magyarul vagy angolul (mindkettő jöhet).
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category / Kategória
+      options: [mechanical, electronics, firmware, mixed]
+    validations:
+      required: true
+  - type: dropdown
+    id: topics
+    attributes:
+      label: Topics / Témák
+      multiple: true
+      options: [poultry, livestock, water, fencing, soil, tools, sensors, energy, storage]
+    validations:
+      required: true
+  - type: dropdown
+    id: requires
+    attributes:
+      label: What a builder needs / Mi kell a megépítéshez
+      multiple: true
+      options: [3d-printer, soldering, welding, woodworking, microcontroller-flashing, none]
+    validations:
+      required: true
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Stage / Állapot
+      description: concept = not built; prototype = built once, not in use; built = works, in use by you; field-tested = in real use, reported. / concept = nem épült meg; prototype = egyszer megépült; built = működik, használod; field-tested = valódi használatban.
+      options: [concept, prototype, built, field-tested]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version / Verzió
+      placeholder: "1.0.0, rev-a or a date such as 2026-10-01"
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: Files / Fájlok
+      description: Where are the files? Links (Printables, your repository) or say "attached below" and drag them into this field (zip if needed, under 20 MB each). / Hol vannak a fájlok? Linkek, vagy „lent csatolva” és húzd ide őket.
+    validations:
+      required: true
+  - type: dropdown
+    id: license
+    attributes:
+      label: Licence / Licenc
+      description: For the whole project; if file groups differ, explain in Limitations. / Az egész projektre; ha fájlcsoportonként eltér, írd le lent.
+      options: [CC-BY-SA-4.0, CC-BY-4.0, CERN-OHL-S-2.0, CERN-OHL-W-2.0, MIT, GPL-3.0-or-later, other (explain below)]
+    validations:
+      required: true
+  - type: textarea
+    id: limitations
+    attributes:
+      label: Limitations and safety / Korlátok és biztonság
+      description: What is untested, what it must not be made of, what it cannot do. / Mi nincs tesztelve, miből nem szabad készíteni, mire nem alkalmas.
+    validations:
+      required: true
+  - type: textarea
+    id: photo
+    attributes:
+      label: Photo of the real object / Fotó a valódi tárgyról
+      description: Drag a photo here (at least 1200 px wide, 4:3 preferred). Required for built and field-tested. / Húzd ide a fotót (legalább 1200 px széles). built és field-tested esetén kötelező.
+  - type: input
+    id: credit
+    attributes:
+      label: Name to credit as maintainer / Karbantartóként feltüntetendő név
+    validations:
+      required: true
+  - type: textarea
+    id: json
+    attributes:
+      label: Machine-readable entry (optional) / Géppel olvasható bejegyzés (opcionális)
+      description: A complete project.json per SUBMITTING.md. Agents and scripts fill this; people can skip it.
+      render: json
+  - type: checkboxes
+    id: rights
+    attributes:
+      label: Rights / Jogok
+      options:
+        - label: I hold the rights to the files, text and photo, or they are already under a licence that allows this publication. / A fájlok, szövegek és a fotó jogai az enyémek, vagy már megengedő licenc alatt állnak.
+          required: true
+        - label: I agree that the catalogue metadata, documentation and photo are published under CC BY-SA 4.0 and the files under the licence chosen above. / Elfogadom, hogy a metaadat, dokumentáció és fotó CC BY-SA 4.0 alatt, a fájlok a fent választott licenc alatt jelennek meg.
+          required: true
+        - label: The photo is a real photograph of the real object, not stock or generated imagery. / A fotó valódi fénykép a valódi tárgyról, nem stock és nem generált kép.
+          required: true

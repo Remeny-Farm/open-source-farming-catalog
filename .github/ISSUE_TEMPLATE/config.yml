@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Exact submission contract (for scripts and agents) / Pontos beküldési szerződés
+    url: https://github.com/Remeny-Farm/open-source-farming-catalog/blob/main/SUBMITTING.md
+    about: The project.json contract, directory layout and validation steps. / A project.json szerződése, könyvtárszerkezet, ellenőrzés.
+  - name: Questions about a design / Kérdés egy tervről
+    url: https://github.com/Remeny-Farm/open-source-farming-catalog/discussions
+    about: Ask in Discussions; issues are for submissions and fixes. / Kérdezz a Discussions alatt; az issue beküldésre és javításra való.
