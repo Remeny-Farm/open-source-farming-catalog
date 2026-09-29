@@ -5,18 +5,20 @@
 """Bambu Studio project (3MF) writer with no dependency on the Bambu CLI.
 
 Mirrors the package the CLI writes (see out/cap_67_P1S.3mf): one assembly
-object per cap in 3D/3dmodel.model, its three mesh bodies in
+object per cap in 3D/3dmodel.model, its mesh bodies (up to four) in
 3D/Objects/object_<k>.model, per-part extruders in
 Metadata/model_settings.config, and a full project_settings.config copied
 from bambu/project_settings.json (the P1S 0.4 / 0.16 mm / PETG Basic project
-Bambu Studio itself exported, with the three settings DESIGN.md asks for)
-with the scheme's filament colours patched in.
+Bambu Studio itself exported, widened to four filaments, on the Textured PEI
+plate, with the three settings DESIGN.md asks for) with the scheme's filament
+colours patched in.
 
 Deterministic: fixed zip timestamps, uuid5 ids, sorted keys -- the same batch
 produces a byte-identical plate.
 """
 
 import json
+import re
 import struct
 import uuid
 import zipfile
@@ -67,6 +69,23 @@ def grid_label(pos: tuple[float, float]) -> str:
     return f"{col}{chr(65 + row)}"
 
 
+def filaments_used(result_json: Path) -> set[int]:
+    """Slots the Bambu CLI actually extruded from, read from the result.json
+    it writes next to the G-code. A plate whose parts all collapsed to slot 1
+    slices without a warning; this is the only place that shows it."""
+    if not result_json.exists():
+        return set()
+    plates = json.loads(result_json.read_text()).get("sliced_plates") or [{}]
+    return {int(f["id"]) for f in plates[0].get("filaments", []) if f.get("total_used_g", 0) > 0}
+
+
+def assigned_slots(plate: Path) -> set[int]:
+    """Slots the plate's parts are assigned to in model_settings.config."""
+    with zipfile.ZipFile(plate) as z:
+        settings = z.read("Metadata/model_settings.config").decode()
+    return {int(s) for s in re.findall(r'<metadata key="extruder" value="(\d+)"/>', settings)}
+
+
 def _uid(*parts: str) -> str:
     return str(uuid.uuid5(NS, ":".join(parts)))
 
@@ -88,9 +107,11 @@ def _mesh_xml(oid: int, name: str, verts, tris) -> str:
             f'<mesh><vertices>{vx}</vertices><triangles>{tx}</triangles></mesh></object>')
 
 
-def write_plate(path: Path, caps: list[dict], scheme: dict, batch_id: str) -> None:
+def write_plate(path: Path, caps: list[dict], scheme: dict, window: dict, batch_id: str) -> None:
     """caps: [{"name", "position": (x, y), "bodies": {"shell"|"window"|"a"|"b": (verts, tris)}}]
     (a and b may be absent when a design leaves that colour unused)
+    scheme: the catalog scheme ({"base"|"a"|"b": {"hex"}}); window: the
+    catalog's clear filament ({"hex"}). Their colours go to AMS slots 1-4.
     Meshes are in world coordinates: cap bottom at z 0, centred on the xy
     origin, already in print orientation; the build item moves each cap to
     its plate position."""
@@ -144,15 +165,19 @@ def write_plate(path: Path, caps: list[dict], scheme: dict, batch_id: str) -> No
         + "".join(instances) + '</plate><assemble></assemble></config>')
     cfg = json.loads(TEMPLATE.read_text())
     cfg["printable_area"], cfg["bed_exclude_area"] = P1S_PRINTABLE_AREA, P1S_EXCLUDE
-    # Not patched: the per-filament arrays (filament_colour, filament_type).
-    # Bambu Studio 02.08 exported them with one entry next to three
-    # filament_settings_id entries; widening filament_colour to three makes
-    # the CLI's G-code export fail silently and widening filament_type floods
-    # it with group_nozzle_info errors (bisected 2026-09-14). The template
-    # stays as exported; AMS slot colours are set on the printer and recorded
-    # in the manifest and README. `scheme` stays in the signature so a future
-    # Bambu release can turn colours on without an API change.
-    del scheme
+    # Bambu Studio counts the project's filaments from the per-filament
+    # arrays, not from filament_settings_id. With one filament_colour entry
+    # it loads a single filament and moves every part to slot 1, in the GUI
+    # and the CLI alike, whatever model_settings says. The template therefore
+    # carries every per-filament array four entries wide (widening only some
+    # of them is what broke the CLI export on 2026-09-14); only the colours
+    # change per scheme. See docs/lab/2026-09-29-cap-plate-filament-slots.md.
+    colours = [scheme["base"]["hex"], window["hex"], scheme["a"]["hex"], scheme["b"]["hex"]]
+    for key, value in cfg.items():
+        if key.startswith("filament_") and isinstance(value, list) and len(value) != len(BODIES):
+            raise SystemExit(f"template {TEMPLATE.name}: {key} has {len(value)} entries, "
+                             f"expected {len(BODIES)}")
+    cfg["filament_colour"] = colours
     cfg.update(RECOMMENDED)
     ctypes = (XML_HEAD + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
               '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'

@@ -8,6 +8,7 @@ Dates follow the lab notes and commits in `source/`.
 - Revision C coupon pair printed once; dimensions good. Full sealed assembly untested.
 - 36-cap batch plate sliced for the per-hen cap generator (`source/docs/lab/2026-09-14-cap-batch-plate.md`).
 - 2026-09-26: source imported into this catalogue with full git history from `Remeny-Farm/hen-tag-enclosure`; that repository is archived.
+- 2026-09-29: batch plates open with the four filament slots assigned (base, clear, a, b) instead of every part on slot 1; Textured PEI plate, 0.16 mm layers (`source/docs/lab/2026-09-29-cap-plate-filament-slots.md`).
 
 ## rev-b (2026-08-30)
 

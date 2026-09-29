@@ -32,15 +32,16 @@
     { "path": "source/cad/hen_tag_enclosure.py", "sha256": "5e514d4a5188c478f809e2725c40d271fd7262eff8514259036fce0ff74d7c94", "role": "source" },
     { "path": "source/cad/cap_marking.py", "sha256": "d6d97b59d2cfaf828621283421d58d2ca74d47ffed5d659970ec5ed03afa1929", "role": "source" },
     { "path": "source/cad/verify.py", "sha256": "8e063f9253732ec04e5dae55e9317035fcd6ecdf787cfb9c8af93a0cfd26cf94", "role": "source" },
-    { "path": "source/README.md", "sha256": "083259160adffee95536d478c906ecf0fecdb645338efc490cbb276ba2bc0b31", "role": "documentation" },
+    { "path": "source/README.md", "sha256": "9e6de52001758f93e05f33d6d702f410993aceb133eaae0b90c16f96231ac636", "role": "documentation" },
     { "path": "source/DESIGN.md", "sha256": "7168e074257ffa64529f3d50e6fe5c17de8f70a136e77ba3104f5282ffcab29e", "role": "documentation" },
     { "path": "source/docs/requirements.md", "sha256": "371db281558f873a164c2e2e04bed74017336c93f5acb1b4c0cdee72117d036e", "role": "documentation" },
-    { "path": "source/cad/README.md", "sha256": "5976697091247255a7c70008dc913b1a6d01b90fec02e422e9d572c02d1ac33f", "role": "documentation" },
+    { "path": "source/cad/README.md", "sha256": "bf2f9e5e55e4e8acb16b5f0a9edea79bd5107287238cf0a345f3379de5aabd48", "role": "documentation" },
     { "path": "source/docs/lab/2026-08-28-enclosure-board-measurements.md", "sha256": "3e96ea66f1097c2d11958c45999db62c381f73b13f08595b9cfbc3f3e2d29b26", "role": "evidence" },
     { "path": "source/docs/lab/2026-08-28-enclosure-print-trial.md", "sha256": "5f6f72452cbf9bbc037ccffa17a7c05e1695443dac6ee4a96bf2d4017d3e2bbb", "role": "evidence" },
     { "path": "source/docs/lab/2026-08-30-enclosure-led-window.md", "sha256": "b0655c5f051f08351315a868324fecb9ba6e9cae899720a2a0bb41bc340cc0f9", "role": "evidence" },
     { "path": "source/docs/lab/2026-09-10-thread-print-failure.md", "sha256": "302e0a37f99a7390044bb6952b5c47e20c82973a668c4983d2007a0d321a1463", "role": "evidence" },
-    { "path": "source/docs/lab/2026-09-14-cap-batch-plate.md", "sha256": "6b7e1ce56e1f96db75556afdb303572086e48b98f64790c83a497784a8ab5645", "role": "evidence" }
+    { "path": "source/docs/lab/2026-09-14-cap-batch-plate.md", "sha256": "6b7e1ce56e1f96db75556afdb303572086e48b98f64790c83a497784a8ab5645", "role": "evidence" },
+    { "path": "source/docs/lab/2026-09-29-cap-plate-filament-slots.md", "sha256": "b062807b2267c69eef0dde2e4d1a344ec4a493c2235982023e256b26427a9ee6", "role": "evidence" }
   ],
   "links": [
     { "kind": "printables", "url": "https://www.printables.com/model/1852118-holyiot-25008-enclosure-nrf54l15-cr2032" },

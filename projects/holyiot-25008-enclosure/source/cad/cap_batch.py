@@ -11,8 +11,9 @@ up to 36 caps, each fully described by serial, icon / centre pattern, band
 pattern and its design hash. Outputs, all named so they match back without a
 database:
 
-    plate_<batch_id>_P1S.3mf        Bambu Studio project, 6 x 6 grid, AMS 1 clear
-                                    / 2 text / 3 accent, print settings baked in
+    plate_<batch_id>_P1S.3mf        Bambu Studio project, 6 x 6 grid, AMS 1 base
+                                    / 2 clear / 3 a / 4 b in the scheme colours,
+                                    print settings baked in
     plate_<batch_id>_manifest.csv   position, serial, hen name, design hash
     proof/<design_hash>.svg         top view in the scheme colours, one per cap
 
@@ -150,7 +151,7 @@ def main() -> int:
         print(f"  cap {c['serial']:>5} at {rows[-1][0]}  {'cache' if hit else 'built'}")
 
     plate = out / f"plate_{batch['batch_id']}_P1S.3mf"
-    write_plate(plate, plate_caps, scheme, batch["batch_id"])
+    write_plate(plate, plate_caps, scheme, cat["window"], batch["batch_id"])
     with open(out / f"plate_{batch['batch_id']}_manifest.csv", "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["position", "serial", "hen_name", "design_hash"])
