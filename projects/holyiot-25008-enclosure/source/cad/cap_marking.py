@@ -41,6 +41,7 @@ letter height, at the price of a shorter message.
 """
 
 import argparse
+import json
 import math
 import sys
 from pathlib import Path
@@ -49,6 +50,7 @@ import build123d as bd
 
 sys.path.insert(0, str(Path(__file__).parent))
 import board_holyiot_25008 as brd  # noqa: E402
+from bambu_project import project_settings  # noqa: E402
 from hen_tag_enclosure import OUT, P, PETG_DENSITY, build_cap  # noqa: E402
 from cap_design import COLOUR_ROLES, ZONES, default_colours, load_catalog  # noqa: E402
 from cap_motifs import (  # noqa: E402
@@ -546,7 +548,7 @@ BAMBU_PROFILES = Path("/Applications/BambuStudio.app/Contents/Resources/profiles
 
 
 def write_bambu_project(generic: Path, out: Path, extruder_by_name: dict,
-                        object_name: str, true_bbox_by_name: dict) -> bool:
+                        object_name: str, true_bbox_by_name: dict, settings: dict) -> bool:
     """Bambu Studio project 3MF: ONE object, three parts, filament slots
     pre-assigned.
 
@@ -558,8 +560,11 @@ def write_bambu_project(generic: Path, out: Path, extruder_by_name: dict,
     as parts with identity transforms -- in register and inseparable), with
     the P1S machine, 0.16 mm process and three PETG filament slots loaded;
     then patch each part's `extruder` in Metadata/model_settings.config and
-    drop the object onto the plate centre. Verified to reload in Bambu Studio
-    with the 1/2/3 mapping intact.
+    drop the object onto the plate centre. The CLI writes every per-filament
+    array one entry wide whatever it loaded, which makes Bambu Studio load a
+    single filament and put every part on slot 1, so project_settings.config
+    is replaced with `settings` (bambu_project.project_settings: four
+    filaments, the scheme's colours).
 
     Returns False (skipping quietly) when Bambu Studio is not installed."""
     import re
@@ -626,6 +631,8 @@ def write_bambu_project(generic: Path, out: Path, extruder_by_name: dict,
         cfg = cfg.replace('<metadata key="name" value="Assembly"/>',
                           f'<metadata key="name" value="{object_name}"/>', 1)
         cfg_path.write_text(cfg)
+        (ex / "Metadata/project_settings.config").write_text(
+            json.dumps(settings, indent=4, sort_keys=True))
 
         # Same translations on the geometry side: the component transforms.
         model_path = ex / "3D/3dmodel.model"
@@ -833,12 +840,12 @@ def main() -> None:
         print(f"  exported {Path(a.proof).name}  (proof, scheme {a.scheme})")
 
     # --- export, print orientation, one shared transform ---------------------
-    flipped = bd.Rot(180, 0, 0) * bodies["shell"]
-    dz = -flipped.bounding_box().min.Z
     parts = {f"cap_{number}": bodies["shell"], f"window_{number}": bodies["window"]}
     for c in ("a", "b"):
         if bodies[c] is not None:
             parts[f"{c}_{number}"] = bodies[c]
+    # The whole cap sits on the bed, not just the shell (see cap_batch).
+    dz = -min((bd.Rot(180, 0, 0) * s).bounding_box().min.Z for s in parts.values())
     oriented = {}
     for name, solid in parts.items():
         oriented[name] = bd.Pos(0, 0, dz) * (bd.Rot(180, 0, 0) * solid)
@@ -855,7 +862,8 @@ def main() -> None:
     if not a.skip_bambu and write_bambu_project(OUT / f"cap_{number}.3mf",
                            OUT / f"cap_{number}_P1S.3mf", extruders,
                            f"cap_{number}",
-                           {n: s.bounding_box() for n, s in oriented.items()}):
+                           {n: s.bounding_box() for n, s in oriented.items()},
+                           project_settings(scheme, cat["window"])):
         print(f"  exported cap_{number}_P1S.3mf  (Bambu project, AMS 1 = base "
               f"{scheme['base']['filament']}, 2 = clear, 3 = {scheme['a']['filament']}, "
               f"4 = {scheme['b']['filament']})")

@@ -68,11 +68,12 @@ def validate_batch(batch: dict, cat: dict) -> list[str]:
 def generator_fingerprint() -> str:
     """Short hash of the generator sources: the body cache is keyed by it as
     well as by the design hash, so a generator change never serves stale
-    bodies for an unchanged design."""
+    bodies for an unchanged design. This file is part of it: build_bodies
+    orients the cached meshes."""
     import hashlib
     h = hashlib.sha256()
     for name in ("hen_tag_enclosure.py", "board_holyiot_25008.py", "cap_marking.py",
-                 "cap_motifs.py", "cap_design.py"):
+                 "cap_motifs.py", "cap_design.py", "cap_batch.py"):
         h.update((HERE / name).read_bytes())
     return h.hexdigest()[:12]
 
@@ -89,7 +90,12 @@ def build_bodies(c: dict, cap_solid, cache: Path) -> tuple[dict, dict, bool]:
     _, solids, sketches, _, _ = build(
         str(c["serial"]), "", icon, DEPTH_DEFAULT, centre=c["centre"], band=c["band"],
         cap=cap_solid, colours=c["colours"])
-    dz = -(bd.Rot(180, 0, 0) * solids["shell"]).bounding_box().min.Z
+    # Drop the whole cap, not the shell, onto the bed: when no top-plate zone
+    # is base-coloured the shell stops 1.1 mm short of the design face, and a
+    # shell-based offset left the window and inlays below z 0. Bambu Studio
+    # then lifted the whole plate and the other caps started in the air.
+    dz = -min((bd.Rot(180, 0, 0) * s).bounding_box().min.Z
+              for s in solids.values() if s is not None)
     bodies = {}
     for name, solid in solids.items():
         if solid is None:

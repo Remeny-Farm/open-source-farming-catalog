@@ -58,6 +58,36 @@ r2 = run(FIX)
 check(r2.returncode == 0 and hashlib.sha256(plate.read_bytes()).hexdigest() == h1, "byte-identical rerun", h1[:12])
 check(r2.stdout.count("cache") >= 3, "second run served all three from cache")
 
+
+def lowest_z_per_cap(plate_3mf: Path) -> list[float]:
+    """Lowest vertex of every cap on the plate (parts carry identity
+    component transforms and the build items move only in x/y)."""
+    import re
+    import zipfile
+    with zipfile.ZipFile(plate_3mf) as z:
+        names = sorted(n for n in z.namelist() if n.startswith("3D/Objects/"))
+        return [min(float(v) for v in re.findall(r'z="([-\d.e]+)"', z.read(n).decode())) for n in names]
+
+
+check(all(abs(z) < 1e-3 for z in lowest_z_per_cap(plate)), "every cap stands on the bed", str(lowest_z_per_cap(plate)))
+
+
+def no_base_on_face(b):
+    # No base colour anywhere on the design face: the shell stops short of
+    # the face, the case that left five caps of the first plate below the bed.
+    sys.path.insert(0, str(HERE))
+    from cap_design import design_hash
+    c = b["caps"][0]
+    c["band"] = None
+    c["colours"].update(ring="b", number="a", disc="a", centre="b", band="a")
+    c["design_hash"] = design_hash(c["serial"], b["scheme"], c["icon"], c["centre"], c["band"], c["colours"])
+
+
+r = run(variant("no_base_on_face", no_base_on_face))
+check(r.returncode == 0 and all(abs(z) < 1e-3 for z in lowest_z_per_cap(plate)),
+      "a cap without base colour on its face stands on the bed",
+      str(lowest_z_per_cap(plate)) if r.returncode == 0 else (r.stdout + r.stderr)[-300:])
+
 print("=== refusals ===")
 cases = [
     ("bad hash", lambda b: b["caps"][0].update(design_hash="0000000000000000"), "does not match"),

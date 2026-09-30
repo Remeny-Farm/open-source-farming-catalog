@@ -86,6 +86,30 @@ def assigned_slots(plate: Path) -> set[int]:
     return {int(s) for s in re.findall(r'<metadata key="extruder" value="(\d+)"/>', settings)}
 
 
+def project_settings(scheme: dict, window: dict) -> dict:
+    """The project_settings.config for a cap project: the template with the
+    P1S bed, the scheme's colours in AMS slots 1-4 (base, clear, a, b) and
+    the DESIGN.md settings. Shared by the batch plate and the single-cap
+    project so both open with four filaments."""
+    cfg = json.loads(TEMPLATE.read_text())
+    cfg["printable_area"], cfg["bed_exclude_area"] = P1S_PRINTABLE_AREA, P1S_EXCLUDE
+    # Bambu Studio counts the project's filaments from the per-filament
+    # arrays, not from filament_settings_id. With one filament_colour entry
+    # it loads a single filament and moves every part to slot 1, in the GUI
+    # and the CLI alike, whatever model_settings says. The template therefore
+    # carries every per-filament array four entries wide (widening only some
+    # of them is what broke the CLI export on 2026-09-14); only the colours
+    # change per scheme. See docs/lab/2026-09-29-cap-plate-filament-slots.md.
+    colours = [scheme["base"]["hex"], window["hex"], scheme["a"]["hex"], scheme["b"]["hex"]]
+    for key, value in cfg.items():
+        if key.startswith("filament_") and isinstance(value, list) and len(value) != len(BODIES):
+            raise SystemExit(f"template {TEMPLATE.name}: {key} has {len(value)} entries, "
+                             f"expected {len(BODIES)}")
+    cfg["filament_colour"] = colours
+    cfg.update(RECOMMENDED)
+    return cfg
+
+
 def _uid(*parts: str) -> str:
     return str(uuid.uuid5(NS, ":".join(parts)))
 
@@ -163,22 +187,7 @@ def write_plate(path: Path, caps: list[dict], scheme: dict, window: dict, batch_
         '<metadata key="thumbnail_no_light_file" value="Metadata/plate_no_light_1.png"/>'
         '<metadata key="top_file" value="Metadata/top_1.png"/><metadata key="pick_file" value="Metadata/pick_1.png"/>'
         + "".join(instances) + '</plate><assemble></assemble></config>')
-    cfg = json.loads(TEMPLATE.read_text())
-    cfg["printable_area"], cfg["bed_exclude_area"] = P1S_PRINTABLE_AREA, P1S_EXCLUDE
-    # Bambu Studio counts the project's filaments from the per-filament
-    # arrays, not from filament_settings_id. With one filament_colour entry
-    # it loads a single filament and moves every part to slot 1, in the GUI
-    # and the CLI alike, whatever model_settings says. The template therefore
-    # carries every per-filament array four entries wide (widening only some
-    # of them is what broke the CLI export on 2026-09-14); only the colours
-    # change per scheme. See docs/lab/2026-09-29-cap-plate-filament-slots.md.
-    colours = [scheme["base"]["hex"], window["hex"], scheme["a"]["hex"], scheme["b"]["hex"]]
-    for key, value in cfg.items():
-        if key.startswith("filament_") and isinstance(value, list) and len(value) != len(BODIES):
-            raise SystemExit(f"template {TEMPLATE.name}: {key} has {len(value)} entries, "
-                             f"expected {len(BODIES)}")
-    cfg["filament_colour"] = colours
-    cfg.update(RECOMMENDED)
+    cfg = project_settings(scheme, window)
     ctypes = (XML_HEAD + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
               '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
               '<Default Extension="model" ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml"/>'
