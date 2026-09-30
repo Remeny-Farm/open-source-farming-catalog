@@ -168,16 +168,20 @@ sweep helper so their bearing faces share a pitch.
    every offending cap; otherwise it writes `out/plates/plate_<id>_P1S.3mf`,
    `plate_<id>_manifest.csv` (`position,serial,hen_name,design_hash`,
    positions `1A`…`6F`) and `proof/<design_hash>.svg`, then slices the plate
-   through Bambu Studio and reports objects, warnings and the time estimate.
-3. Open the plate in Bambu Studio, set AMS 1 = the scheme's base filament,
+   through Bambu Studio and reports objects, warnings, the time estimate and
+   which filament slots extruded; it fails unless every assigned slot did.
+3. Open the plate in Bambu Studio. Every part is already on its slot and the
+   slots show the scheme colours: AMS 1 = the scheme's base filament,
    2 = Prusament PETG Clear, 3 = colour a, 4 = colour b (`catalog.json` names
-   them; the batch CLI prints the mapping), print. The plate carries the
-   `Bambu PETG Basic @BBL X1C` preset in all four slots whatever the scheme
-   (Prusament, Bambu PETG Basic, or Bambu PETG Translucent in `lavender`'s
-   slot 4): the per-filament arrays stay as exported (see
-   `bambu_project.py`): temperatures and flow come from that preset, the
-   AMS mapping on the printer decides which spool feeds each slot. Whether
-   PETG Translucent prints well on the Basic preset is UNVERIFIED.
+   them; the batch CLI prints the mapping). The patrons' zone choices are in
+   the geometry, so load those four spools and print; no per-cap setting
+   exists. The plate carries the `Bambu PETG Basic @BBL X1C` preset in all
+   four slots whatever the scheme (Prusament, Bambu PETG Basic, or Bambu
+   PETG Translucent in `lavender`'s slot 4): temperatures and flow come from
+   that preset, the AMS mapping on the printer decides which spool feeds
+   each slot. Whether PETG Translucent prints well on the Basic preset is
+   UNVERIFIED. The design face prints against the bed: compare a cap with its
+   proof in the bottom view.
 4. Upload the proofs to the app (file name = design hash).
 
 Patterns must survive a 0.4 mm erosion (feature ≥ 0.8 mm) and a 0.4 mm

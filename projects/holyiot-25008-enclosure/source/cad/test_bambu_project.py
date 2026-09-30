@@ -18,7 +18,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent   # the Bambu CLI needs an absolute --outputdir
 sys.path.insert(0, str(HERE))
-from bambu_project import APP, grid_label, grid_positions, write_plate  # noqa: E402
+from bambu_project import APP, filaments_used, grid_label, grid_positions, write_plate  # noqa: E402
 
 PASS, FAIL = 0, []
 
@@ -37,13 +37,14 @@ def cube(s: float, z0: float = 0.0):
     return v, t
 
 
-scheme = {"id": "classic", "text": {"hex": "#101010"}, "accent": {"hex": "#F4F4F0"}}
+scheme = {"id": "classic", "base": {"hex": "#FFFFFF"}, "a": {"hex": "#4F2C1D"}, "b": {"hex": "#DBC8B6"}}
+window = {"hex": "#E6EDF1"}
 caps = [{"name": f"cap_{n}", "position": pos,
          "bodies": {"shell": cube(10.0), "window": cube(4.0, 10.0), "a": cube(2.0, 14.0), "b": cube(1.5, 16.0)}}
         for n, pos in zip((1, 2), grid_positions(2))]
 caps[1]["bodies"].pop("b")     # a design that leaves colour b unused
 out = HERE / "out" / "test_plate.3mf"
-write_plate(out, caps, scheme, "test-batch")
+write_plate(out, caps, scheme, window, "test-batch")
 z = zipfile.ZipFile(out)
 names = z.namelist()
 check("3D/3dmodel.model" in names and "Metadata/model_settings.config" in names
@@ -61,11 +62,25 @@ cfg = json.loads(z.read("Metadata/project_settings.config"))
 check(cfg["wall_loops"] == "3" and cfg["reduce_crossing_wall"] == "1" and cfg["wall_generator"] == "arachne"
       and len(cfg["filament_settings_id"]) == 4
       and cfg["printable_area"][2] == "256x256", "settings, four filaments, plate area")
+# One entry per filament in every per-filament array, or Bambu Studio loads a
+# single filament and prints every part from slot 1.
+check(cfg["filament_colour"] == ["#FFFFFF", "#E6EDF1", "#4F2C1D", "#DBC8B6"]
+      and cfg["filament_type"] == ["PETG"] * 4
+      and all(len(v) == 4 for k, v in cfg.items() if k.startswith("filament_") and isinstance(v, list)),
+      "scheme colours in slots 1-4, every per-filament array four wide")
+check(cfg["curr_bed_type"] == "Textured PEI Plate" and cfg["layer_height"] == "0.16",
+      "PETG-capable plate, 0.16 mm layers")
 h1 = hashlib.sha256(out.read_bytes()).hexdigest()
-write_plate(out, caps, scheme, "test-batch")
+write_plate(out, caps, scheme, window, "test-batch")
 check(hashlib.sha256(out.read_bytes()).hexdigest() == h1, "byte-identical on rerun", h1[:12])
 check(grid_positions(36)[-1] == (218.0, 218.0) and len(grid_positions(36)) == 36, "36-cap grid")
 check(grid_label((38.0, 38.0)) == "1A" and grid_label((218.0, 218.0)) == "6F", "grid labels 1A..6F")
+sunk = [{**caps[0], "bodies": {**caps[0]["bodies"], "window": cube(4.0, -1.1)}}]
+try:
+    write_plate(HERE / "out" / "test_sunk.3mf", sunk, scheme, window, "test-batch")
+    check(False, "a cap below the bed refused")
+except SystemExit as e:
+    check("not on the bed" in str(e), "a cap below the bed refused", str(e))
 try:
     grid_positions(37)
     check(False, "37 caps refused")
@@ -85,6 +100,8 @@ if APP.exists():
     check(g.exists() and not errors and len(ids) == 2,
           "Bambu Studio slices the plate with 2 objects",
           f"{len(ids)} object ids" if g.exists() and not errors else (errors[-1:] or [log[-300:]])[0][-200:])
+    used = filaments_used(work / "result.json")
+    check(used == {1, 2, 3, 4}, "every part prints from its own slot", f"filaments used: {sorted(used)}")
     shutil.rmtree(work, ignore_errors=True)
 else:
     print("  (Bambu Studio not installed; slice step skipped)")

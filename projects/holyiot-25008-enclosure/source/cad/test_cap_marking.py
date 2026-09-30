@@ -133,6 +133,18 @@ if "--bambu" in sys.argv:
     f = OUT / "cap_88888_P1S.3mf"
     check(all_checks_passed(r) and "P1S.3mf" in r.stdout and f.exists(),
           "cap_88888_P1S.3mf produced with registration verify")
+    if f.exists():
+        import shutil
+        sys.path.insert(0, str(HERE))
+        from bambu_project import APP, assigned_slots, filaments_used
+        work = OUT / "slice_marking_test"
+        shutil.rmtree(work, ignore_errors=True)
+        subprocess.run([str(APP), "--debug", "2", "--slice", "0", "--outputdir", str(work), str(f)],
+                       capture_output=True, text=True)
+        assigned, used = assigned_slots(f), filaments_used(work / "result.json")
+        check(bool(assigned) and used == assigned, "every part prints from its own slot",
+              f"assigned {sorted(assigned)}, used {sorted(used)}")
+        shutil.rmtree(work, ignore_errors=True)
 
 print("=== layout export and proof ===")
 sys.path.insert(0, str(HERE))

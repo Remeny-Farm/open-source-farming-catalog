@@ -67,11 +67,13 @@ cd ../editor && pnpm install && pnpm dev                            # the patron
   [`cad/cap_motifs.py`](cad/cap_motifs.py) holds every motif as parametric
   geometry, [`cad/check_motifs.py`](cad/check_motifs.py) proves them printable.
 - [`cad/cap_batch.py`](cad/cap_batch.py) turns the admin's batch JSON into
-  `plate_<batch>_P1S.3mf` (6 × 6, up to 36 caps, AMS 1 clear / 2 text /
-  3 accent, print settings baked in), a manifest and a proof SVG per cap.
-  A 36-cap plate slices to 36 objects in an estimated 4 h 13 m
-  ([lab note](docs/lab/2026-09-14-cap-batch-plate.md)); **no plate has been
-  printed yet.**
+  `plate_<batch>_P1S.3mf` (6 × 6, up to 36 caps, AMS 1 base / 2 clear /
+  3 a / 4 b in the scheme colours, print settings baked in), a manifest and a
+  proof SVG per cap. A 36-cap plate slices to 36 objects in an estimated
+  6 h 17 m at 0.16 mm with 20 filament changes
+  ([lab note](docs/lab/2026-09-14-cap-batch-plate.md),
+  [slot fix](docs/lab/2026-09-29-cap-plate-filament-slots.md)); **no plate
+  has been printed yet.**
 - [`editor/`](editor/) is the drop-in patron editor built with chirp's own
   UI package; see its README for how it maps into the chirp repository.
 

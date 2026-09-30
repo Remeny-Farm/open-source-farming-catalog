@@ -58,6 +58,7 @@ RECOMMENDED = {
 # Where open air is, per part, in PRINT coordinates (z from the bed).
 #   (label, centre offset x, y, radius, z_lo, z_hi)  -- travels within `radius`
 #   of that centre between those heights are counted.
+from bambu_project import assigned_slots, filaments_used  # noqa: E402
 from hen_tag_enclosure import P  # noqa: E402
 
 _p = P
@@ -200,10 +201,14 @@ def main() -> int:
                 and "[WARNING]" not in ln and "no filament colors" not in ln]
         est = re.search(r"; total estimated time: (.+)", text)
         m = re.search(r"max_cantilever_dist=([\d.]+)", log)
-        ok = g.exists() and not warn
+        # Every slot a part is assigned to must extrude; a plate that loaded
+        # one filament prints every part from slot 1 without a warning.
+        assigned, used = assigned_slots(plate), filaments_used(work / "result.json")
+        ok = g.exists() and not warn and used == assigned
         print(f"  [{'PASS' if ok else 'FAIL'}] {plate.name:36} {n_obj} objects sliced"
               + (f", {est.group(1).strip()}" if est else "")
-              + (f", max_cantilever_dist {float(m.group(1)):.0f}" if m else ""))
+              + (f", max_cantilever_dist {float(m.group(1)):.0f}" if m else "")
+              + f", slots used {sorted(used)} of {sorted(assigned)}")
         for w in warn:
             print(f"         slicer: {w}")
         if not ok:
