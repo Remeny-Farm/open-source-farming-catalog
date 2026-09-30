@@ -75,6 +75,12 @@ write_plate(out, caps, scheme, window, "test-batch")
 check(hashlib.sha256(out.read_bytes()).hexdigest() == h1, "byte-identical on rerun", h1[:12])
 check(grid_positions(36)[-1] == (218.0, 218.0) and len(grid_positions(36)) == 36, "36-cap grid")
 check(grid_label((38.0, 38.0)) == "1A" and grid_label((218.0, 218.0)) == "6F", "grid labels 1A..6F")
+sunk = [{**caps[0], "bodies": {**caps[0]["bodies"], "window": cube(4.0, -1.1)}}]
+try:
+    write_plate(HERE / "out" / "test_sunk.3mf", sunk, scheme, window, "test-batch")
+    check(False, "a cap below the bed refused")
+except SystemExit as e:
+    check("not on the bed" in str(e), "a cap below the bed refused", str(e))
 try:
     grid_positions(37)
     check(False, "37 caps refused")

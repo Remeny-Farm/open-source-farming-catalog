@@ -42,7 +42,7 @@
     { "path": "source/docs/lab/2026-09-10-thread-print-failure.md", "sha256": "302e0a37f99a7390044bb6952b5c47e20c82973a668c4983d2007a0d321a1463", "role": "evidence" },
     { "path": "source/docs/lab/2026-09-14-cap-batch-plate.md", "sha256": "6b7e1ce56e1f96db75556afdb303572086e48b98f64790c83a497784a8ab5645", "role": "evidence" },
     { "path": "source/docs/lab/2026-09-29-cap-plate-filament-slots.md", "sha256": "b062807b2267c69eef0dde2e4d1a344ec4a493c2235982023e256b26427a9ee6", "role": "evidence" },
-    { "path": "source/docs/lab/2026-09-30-cap-plate-floating-caps.md", "sha256": "d3af5b6653b51f4560c983d96856f0c0feee38c4d60febd9bafdfd5090b67d3f", "role": "evidence" }
+    { "path": "source/docs/lab/2026-09-30-cap-plate-floating-caps.md", "sha256": "464db7bb43de60a9f5088b47c878dc040e803b823e81204acebc75f334d3a4c8", "role": "evidence" }
   ],
   "links": [
     { "kind": "printables", "url": "https://www.printables.com/model/1852118-holyiot-25008-enclosure-nrf54l15-cr2032" },

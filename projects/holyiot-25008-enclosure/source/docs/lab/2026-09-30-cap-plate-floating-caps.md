@@ -51,6 +51,13 @@ design face: the ring on `a` or `b`, and no zone that draws anything in
   bed as one piece, its lowest points (the five sunken faces) went to z 0
   and every other cap was lifted 1.1 mm. The first ten layers were the five
   caps' faces alone; at 1.25 mm the other 31 faces started in the air.
+- Sliced as generated (36 separate objects), the same plate is harmless:
+  Bambu Studio drops each object onto the bed on its own. Slicing the
+  generated plate with the CLI put all 36 caps on the first layer (47
+  layers, 7.56 mm). The fault needs both the sunken caps and the plate
+  becoming one object, which happened in Bambu Studio before this print;
+  how it was merged is not known. A slicer first-layer check on the
+  generated plate would therefore not have caught it.
 - `cap_marking.py` placed the single-cap project the same way.
 - The body cache (`out/cache/<fingerprint>/<design hash>`) holds the
   oriented meshes, but `cap_batch.py` was not in the fingerprint. After the
@@ -62,7 +69,10 @@ design face: the ring on `a` or `b`, and no zone that draws anything in
    bed.
 2. `cap_batch.py` joins the cache fingerprint, so any change to the batch
    generator discards cached bodies.
-3. `test_cap_batch.py` checks that every cap on the plate starts at z 0,
+3. `write_plate` refuses a plate on which any cap's lowest point is not at
+   z 0, so a sunken cap can no longer reach a plate file at all
+   (`test_bambu_project.py` covers the refusal).
+4. `test_cap_batch.py` checks that every cap on the plate starts at z 0,
    including a design with no base colour on its face. Before the fix that
    design's cap started at -1.1 mm.
 

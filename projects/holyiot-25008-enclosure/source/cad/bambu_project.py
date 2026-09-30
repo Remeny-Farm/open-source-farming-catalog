@@ -141,6 +141,13 @@ def write_plate(path: Path, caps: list[dict], scheme: dict, window: dict, batch_
     its plate position."""
     if len(caps) > PLATE_MAX:
         raise SystemExit(f"{len(caps)} caps exceed the plate ({PLATE_MAX})")
+    # Every cap must stand on the bed on its own. Bambu Studio drops each
+    # object to the bed, which hides a sunken cap until the plate is sliced
+    # as one object; then the other caps start in the air (2026-09-30).
+    for cap in caps:
+        low = min(v[2] for verts, _ in cap["bodies"].values() for v in verts)
+        if abs(low) > 1e-6:
+            raise SystemExit(f"{cap['name']}: lowest point at z {low:.3f} mm, not on the bed")
     entries: list[tuple[str, bytes]] = []
     assemblies, items, settings_objects, instances = [], [], [], []
     for k, cap in enumerate(caps):
