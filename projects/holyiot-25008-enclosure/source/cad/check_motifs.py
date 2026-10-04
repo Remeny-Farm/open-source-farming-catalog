@@ -9,6 +9,12 @@
 Every icon and centre pattern: inside r 7.4, features >= 0.8 mm, gaps >= 0.8 mm.
 Every band pattern (for serial 67 and 12345): inside r 12.2-14.8 and the
 window, same feature and gap rules. --svg writes a contact sheet.
+
+The face rule on top: every motif is an inlay flush with the design face,
+which is the first layer, 0.5 mm lines on the textured plate. An island or a
+gap there needs two lines, cm.FACE_MIN. Motifs drawn to the older 0.8 mm
+rule and not yet redrawn are listed in cm.FACE_PENDING; a listed motif that
+meets the face rule must leave the list.
 """
 import math
 import sys
@@ -42,14 +48,19 @@ def real_faces(sk):
     return [f for f in sk.faces() if f.area > cm.SLIVER_AREA]
 
 
-def feature_ok(sk):
+def feature_ok(sk, erosion=cm.PATTERN_ERODE):
     """Every island survives the erosion whole: nothing thinner than the
     minimum feature anywhere, no neck that would split it."""
-    return len(real_faces(erode(sk, cm.PATTERN_ERODE))) == len(real_faces(sk))
+    return len(real_faces(erode(sk, erosion))) == len(real_faces(sk))
 
 
-def gap_ok(sk):
-    return len(real_faces(fatten(sk, cm.PATTERN_GAP_MIN / 2))) == len(real_faces(sk))
+def gap_ok(sk, gap=cm.PATTERN_GAP_MIN):
+    return len(real_faces(fatten(sk, gap / 2))) == len(real_faces(sk))
+
+
+def face_ok(sk):
+    # erode by a little less than half, as PATTERN_ERODE does for 0.8 mm
+    return feature_ok(sk, cm.FACE_MIN / 2 - 0.05) and gap_ok(sk, cm.FACE_MIN)
 
 
 def radial_range(sk):
@@ -74,13 +85,19 @@ def angle_ok(sk):
     return True
 
 
+FACE = {}   # "kind:name" -> meets the face rule (for every serial, for a band)
+
+
 def report(kind, name, sk, ok_extent, extent_txt):
-    fo, go = feature_ok(sk), gap_ok(sk)
+    fo, go, face = feature_ok(sk), gap_ok(sk), face_ok(sk)
+    key = f"{kind}:{name.split('/')[0]}"
+    FACE[key] = FACE.get(key, True) and face
     ok = fo and go and ok_extent
     if not ok:
         FAIL.append(f"{kind}:{name}")
     print(f"  [{'PASS' if ok else 'FAIL'}] {kind:7} {name:14} islands {len(sk.faces()):2d}  "
-          f"feature {'ok' if fo else 'THIN'}  gap {'ok' if go else 'NARROW'}  {extent_txt}")
+          f"feature {'ok' if fo else 'THIN'}  gap {'ok' if go else 'NARROW'}  "
+          f"face {'ok' if face else f'<{cm.FACE_MIN}'}  {extent_txt}")
 
 
 sheet = []
@@ -117,6 +134,19 @@ if "--svg" in sys.argv:
     out.write_text(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {cols * cell} {rows * cell}" width="{cols * 120}" height="{rows * 120}">'
                    + "".join(parts) + "</svg>\n")
     print(f"wrote {out}")
+
+print(f"=== face rule: islands and gaps >= {cm.FACE_MIN} mm on the first layer ===")
+for key, face in FACE.items():
+    if face == (key in cm.FACE_PENDING):
+        FAIL.append(key)
+        print(f"  [FAIL] {key}: " + ("meets the face rule, take it out of FACE_PENDING" if face
+                                   else "below the face rule and not in FACE_PENDING"))
+for key in sorted(cm.FACE_PENDING - set(FACE)):
+    FAIL.append(key)
+    print(f"  [FAIL] {key}: in FACE_PENDING but not in the library")
+waiting = sorted(k for k, face in FACE.items() if not face)
+print(f"  {len(waiting)} of {len(FACE)} motifs wait for a redraw: {', '.join(waiting)}" if waiting
+      else f"  all {len(FACE)} motifs meet the face rule")
 
 print("=" * 60)
 print("all motifs printable" if not FAIL else f"FAILED: {', '.join(FAIL)}")

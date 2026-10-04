@@ -18,7 +18,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent   # the Bambu CLI needs an absolute --outputdir
 sys.path.insert(0, str(HERE))
-from bambu_project import APP, filaments_used, grid_label, grid_positions, write_plate  # noqa: E402
+from bambu_project import (APP, filaments_used, first_layer_order, flush_floor, flush_volume,  # noqa: E402
+                           grid_label, grid_positions, project_settings, write_plate)
 
 PASS, FAIL = 0, []
 
@@ -30,8 +31,8 @@ def check(cond, label, detail=""):
     print(f"  [{'PASS' if cond else 'FAIL'}] {label}  {detail}")
 
 
-def cube(s: float, z0: float = 0.0):
-    v = [(x, y, z) for z in (z0, z0 + s) for y in (-s / 2, s / 2) for x in (-s / 2, s / 2)]
+def cube(s: float, z0: float = 0.0, x0: float = 0.0, y0: float = 0.0):
+    v = [(x0 + x, y0 + y, z) for z in (z0, z0 + s) for y in (-s / 2, s / 2) for x in (-s / 2, s / 2)]
     t = [(0, 2, 1), (1, 2, 3), (4, 5, 6), (5, 7, 6), (0, 1, 4), (1, 5, 4),
          (2, 6, 3), (3, 6, 7), (0, 4, 2), (2, 4, 6), (1, 3, 5), (3, 7, 5)]
     return v, t
@@ -40,7 +41,8 @@ def cube(s: float, z0: float = 0.0):
 scheme = {"id": "classic", "base": {"hex": "#FFFFFF"}, "a": {"hex": "#4F2C1D"}, "b": {"hex": "#DBC8B6"}}
 window = {"hex": "#E6EDF1"}
 caps = [{"name": f"cap_{n}", "position": pos,
-         "bodies": {"shell": cube(10.0), "window": cube(4.0, 10.0), "a": cube(2.0, 14.0), "b": cube(1.5, 16.0)}}
+         "bodies": {"shell": cube(10.0), "window": cube(4.0, 0.0, 9.0), "a": cube(2.0, 0.0, -9.0),
+                    "b": cube(1.5, 0.0, 0.0, 9.0)}}   # all four on the first layer, like a design face
         for n, pos in zip((1, 2), grid_positions(2))]
 caps[1]["bodies"].pop("b")     # a design that leaves colour b unused
 out = HERE / "out" / "test_plate.3mf"
@@ -70,6 +72,34 @@ check(cfg["filament_colour"] == ["#FFFFFF", "#E6EDF1", "#4F2C1D", "#DBC8B6"]
       "scheme colours in slots 1-4, every per-filament array four wide")
 check(cfg["curr_bed_type"] == "Textured PEI Plate" and cfg["layer_height"] == "0.16",
       "PETG-capable plate, 0.16 mm layers")
+# The template is Bambu's own P1S, not libslic3r's default printer: that one
+# starts with a bare G28 and never changes filament (2026-10-04).
+check(cfg["single_extruder_multi_material"] == "1" and "M620" in cfg["change_filament_gcode"]
+      and cfg["printable_height"] == "250" and cfg["printer_settings_id"] == "Bambu Lab P1S 0.4 nozzle",
+      "the P1S machine profile, AMS filament change included")
+check(len(cfg["flush_volumes_vector"]) == 8, "flush_volumes_vector two entries per filament",
+      str(len(cfg["flush_volumes_vector"])))
+check(cfg["initial_layer_print_height"] == "0.2" and cfg["initial_layer_line_width"] == "0.5"
+      and cfg["initial_layer_flow_ratio"] == "1.05" and cfg["initial_layer_infill_speed"] == ["35", "35"]
+      and cfg["bottom_surface_pattern"] == "monotonic" and cfg["elefant_foot_compensation"] == "0.15"
+      and cfg["brim_type"] == "no_brim", "first-layer settings for the design face")
+check(cfg["enable_prime_tower"] == "1" and cfg["wipe_tower_x"] == ["237.5"] and cfg["prime_tower_width"] == "14",
+      "prime tower in the strip right of the grid")
+# Bambu Studio's own purge volumes for the 2026-09-29 plate's colours (its
+# G-code, every pair the GUI recalculated). The clear slot ran Generic PETG
+# there, whose floor has no cutter retraction in it: 107 instead of 63.
+gui = ["#FFFFFF", "#77EDD7", "#4F2C1D", "#DBC8B6"]
+seen = {(0, 1): 179, (0, 2): 157, (0, 3): 123, (1, 0): 370, (1, 2): 253, (1, 3): 260,
+        (2, 0): 563, (2, 1): 533, (3, 0): 263, (3, 1): 197}
+got = {k: flush_volume(gui[k[0]], gui[k[1]], 107 if k[0] == 1 else 63) for k in seen}
+check(got == seen, "purge volumes match Bambu Studio", "" if got == seen else str(got))
+check([flush_floor(cfg, i) for i in range(4)] == [63] * 4, "purge floor 63 mm3 (PETG Basic, cutter retraction)")
+m = [int(v) for v in cfg["flush_volumes_matrix"]]
+check(m[2 * 4 + 0] == flush_volume("#4F2C1D", "#FFFFFF", 63) == 563 and m[0] == 0,
+      "scheme colours drive the plate's purge matrix", f"brown -> white {m[8]} mm3")
+check(cfg["first_layer_print_sequence"] == ["2", "1", "4", "3"]
+      and first_layer_order(["#101010", "#E6EDF1", "#F5F5F5", "#808080"]) == [2, 3, 4, 1],
+      "first layer: clear, then light to dark", str(cfg["first_layer_print_sequence"]))
 h1 = hashlib.sha256(out.read_bytes()).hexdigest()
 write_plate(out, caps, scheme, window, "test-batch")
 check(hashlib.sha256(out.read_bytes()).hexdigest() == h1, "byte-identical on rerun", h1[:12])
@@ -102,6 +132,28 @@ if APP.exists():
           f"{len(ids)} object ids" if g.exists() and not errors else (errors[-1:] or [log[-300:]])[0][-200:])
     used = filaments_used(work / "result.json")
     check(used == {1, 2, 3, 4}, "every part prints from its own slot", f"filaments used: {sorted(used)}")
+    text = g.read_text(errors="replace") if g.exists() else ""
+    first = text.split("; CHANGE_LAYER")[1] if text.count("; CHANGE_LAYER") > 1 else ""
+    loads = [int(n) + 1 for n in re.findall(r"^M620 S(\d+)A", text.split("; CHANGE_LAYER")[0] + first, re.M)]
+    check(loads[:4] == [2, 1, 4, 3], "the AMS loads clear, white, beige, brown for the first layer", str(loads))
+    # Tower lines: inside the tower block, outside the filament change it
+    # wraps (M620 ... M621 purges into the chute and wipes off the plate).
+    tower, x, y, in_tower, changing = [], 0.0, 0.0, False, False
+    for ln in text.splitlines():
+        if ln.startswith(("; WIPE_TOWER_START", "; WIPE_TOWER_END")):
+            in_tower = ln.startswith("; WIPE_TOWER_START")
+        elif ln.startswith(("M620 S", "M621 S")):
+            changing = ln.startswith("M620")
+        elif ln.startswith("G1 ") and not changing:
+            mx, my, me = (re.search(rf"{a}([-\d.]+)", ln) for a in "XYE")
+            nx, ny = float(mx.group(1)) if mx else x, float(my.group(1)) if my else y
+            if in_tower and me and float(me.group(1)) > 0:
+                tower += [(x, y), (nx, ny)]
+            x, y = nx, ny
+    xs, ys = [p[0] for p in tower], [p[1] for p in tower]
+    check(tower and 234.5 < min(xs) and max(xs) < 254.5 and 0 < min(ys) and max(ys) < 256,
+          "prime tower between the grid and the plate edge",
+          f"x {min(xs):.1f}-{max(xs):.1f}, y {min(ys):.1f}-{max(ys):.1f}" if tower else "no tower")
     shutil.rmtree(work, ignore_errors=True)
 else:
     print("  (Bambu Studio not installed; slice step skipped)")

@@ -84,15 +84,26 @@ def flatten(name: str) -> dict:
     return base
 
 
+def profile_args(prof: dict, workdir: Path) -> list[str]:
+    """CLI arguments loading the P1S, the given process and PETG Basic.
+    Machine and filament go in resolved (bambu_template.user_preset): handed
+    the system files, the CLI resolves neither inherits nor includes and
+    slices on libslic3r's default printer and PLA."""
+    from bambu_template import user_preset
+    mj, pj, fj = workdir / "machine.json", workdir / "process.json", workdir / "filament.json"
+    mj.write_text(json.dumps(user_preset("machine", MACHINE.stem)))
+    fj.write_text(json.dumps(user_preset("filament", FILAMENT.stem)))
+    # the plate the farm prints PETG on; the CLI refuses PETG on its default Cool Plate
+    pj.write_text(json.dumps({**prof, "curr_bed_type": "Textured PEI Plate"}))
+    return ["--load-settings", f"{mj};{pj}", "--load-filaments", str(fj)]
+
+
 def slice_part(stl: Path, overrides: dict, workdir: Path) -> tuple[Path | None, str]:
     prof = flatten(PROCESS)
     prof.update(overrides)
     prof["name"], prof["from"] = "hen_tag_check", "User"
-    pj = workdir / "process.json"
-    json.dump(prof, open(pj, "w"))
     r = subprocess.run(
-        [str(APP), "--debug", "4", "--load-settings", f"{MACHINE};{pj}",
-         "--load-filaments", str(FILAMENT), "--slice", "0",
+        [str(APP), "--debug", "4", *profile_args(prof, workdir), "--slice", "0",
          "--outputdir", str(workdir), str(stl)],
         capture_output=True, text=True)
     g = workdir / "plate_1.gcode"
@@ -158,15 +169,14 @@ def write_project(parts: list[str]) -> bool:
     prof = flatten(PROCESS)
     prof.update(RECOMMENDED)
     prof["name"], prof["from"] = "hen_tag_revC", "User"
-    pj = work / "process.json"
-    json.dump(prof, open(pj, "w"))
     r = subprocess.run(
-        [str(APP), "--debug", "2", "--load-settings", f"{MACHINE};{pj}",
-         "--load-filaments", str(FILAMENT), "--export-3mf", str(PROJECT)]
-        + [str(OUT / f"{n}.stl") for n in parts],
+        [str(APP), "--debug", "2", *profile_args(prof, work), "--outputdir", str(work),
+         "--export-3mf", PROJECT.name] + [str(OUT / f"{n}.stl") for n in parts],
         capture_output=True, text=True)
+    ok = r.returncode == 0 and (work / PROJECT.name).exists()
+    if ok:
+        shutil.copyfile(work / PROJECT.name, PROJECT)
     shutil.rmtree(work, ignore_errors=True)
-    ok = r.returncode == 0 and PROJECT.exists()
     print(f"  {'wrote' if ok else 'FAILED to write'} {PROJECT.name}: "
           f"{', '.join(parts)} on one plate, "
           + ", ".join(f"{k}={v}" for k, v in RECOMMENDED.items()))
@@ -179,18 +189,28 @@ def main() -> int:
         return 0
     stock = "--stock" in sys.argv
     keep = "--keep" in sys.argv
-    plates = [Path(a).resolve() for a in sys.argv[1:] if a.endswith(".3mf")]
+    plates = [Path(a).resolve() for a in sys.argv[1:]
+              if a.endswith(".3mf") and not a.endswith(".gcode.3mf")]
+    sliced = [a for a in sys.argv[1:] if a.endswith(".gcode.3mf")]
+    for a in sliced:
+        print(f"  (skipped {Path(a).name}: already sliced, the output of a plate check)")
     parts = [a for a in sys.argv[1:] if not a.startswith("--") and not a.endswith(".3mf")]
-    if not parts and not plates:
+    if not parts and not plates and not sliced:
         parts = list(OPEN_AIR)
     if "--project" in sys.argv:
         return 0 if write_project(parts or list(OPEN_AIR)) else 1
     fails = []
     # A finished plate (cap_batch.py output) carries its own settings: slice
-    # it as-is and report objects, warnings and the slicer's estimate.
+    # it as-is and report objects, warnings and the slicer's estimate. A plate
+    # that passes gets its sliced project next to it, <plate>.gcode.3mf: the
+    # file to print, so nothing is re-sliced between this check and the
+    # printer (docs/lab/2026-10-04-cap-face-first-layer.md).
     for plate in plates:
         work = Path(tempfile.mkdtemp())
-        r = subprocess.run([str(APP), "--debug", "4", "--slice", "0", "--outputdir", str(work), str(plate)],
+        sliced = plate.with_name(plate.stem + ".gcode.3mf")
+        sliced.unlink(missing_ok=True)
+        r = subprocess.run([str(APP), "--debug", "4", "--slice", "0", "--outputdir", str(work),
+                            "--export-3mf", sliced.name, str(plate)],
                            capture_output=True, text=True)
         log = r.stdout + r.stderr
         g = work / "plate_1.gcode"
@@ -201,17 +221,25 @@ def main() -> int:
                 and "[WARNING]" not in ln and "no filament colors" not in ln]
         est = re.search(r"; total estimated time: (.+)", text)
         m = re.search(r"max_cantilever_dist=([\d.]+)", log)
-        # Every slot a part is assigned to must extrude; a plate that loaded
-        # one filament prints every part from slot 1 without a warning.
+        # Every slot a part is assigned to must extrude, and the AMS must load
+        # it: a plate that loaded one filament prints every part from slot 1
+        # without a warning, and a project on libslic3r's default printer
+        # extrudes all four with no filament change at all.
         assigned, used = assigned_slots(plate), filaments_used(work / "result.json")
-        ok = g.exists() and not warn and used == assigned
+        loaded = {int(n) + 1 for n in re.findall(r"^M620 S(\d+)A", text, re.M)}
+        exported = (work / sliced.name).exists()
+        ok = g.exists() and not warn and used == assigned and loaded == assigned and exported
         print(f"  [{'PASS' if ok else 'FAIL'}] {plate.name:36} {n_obj} objects sliced"
               + (f", {est.group(1).strip()}" if est else "")
               + (f", max_cantilever_dist {float(m.group(1)):.0f}" if m else "")
-              + f", slots used {sorted(used)} of {sorted(assigned)}")
+              + f", slots used {sorted(used)}, AMS loads {sorted(loaded)} of {sorted(assigned)}"
+              + ("" if exported else ", no sliced project exported"))
         for w in warn:
             print(f"         slicer: {w}")
-        if not ok:
+        if ok:
+            shutil.copyfile(work / sliced.name, sliced)
+            print(f"         wrote {sliced.name}")
+        else:
             fails.append(plate.name)
         shutil.rmtree(work, ignore_errors=True)
     overrides = {} if stock else RECOMMENDED

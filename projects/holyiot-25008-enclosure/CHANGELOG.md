@@ -10,6 +10,7 @@ Dates follow the lab notes and commits in `source/`.
 - 2026-09-26: source imported into this catalogue with full git history from `Remeny-Farm/hen-tag-enclosure`; that repository is archived.
 - 2026-09-29: batch plates open with the four filament slots assigned (base, clear, a, b) instead of every part on slot 1; Textured PEI plate, 0.16 mm layers (`source/docs/lab/2026-09-29-cap-plate-filament-slots.md`).
 - 2026-09-30: every cap on a batch plate starts on the bed; caps with no base colour on their face had sunk 1.1 mm and lifted the rest of the first production plate into the air. The batch generator is now part of the body cache key (`source/docs/lab/2026-09-30-cap-plate-floating-caps.md`).
+- 2026-10-04: cap plates print as sliced. The settings template is Bambu's own P1S / 0.16mm Optimal / PETG Basic export (it had been libslic3r's defaults: no AMS filament change, a bare `G28` start); first layer 0.2 mm in 0.5 mm lines at 1.05 flow, a prime tower beside the grid, purge volumes from the scheme colours, and the slice check writes the print-ready `.gcode.3mf`. The cap face edge has a 0.3 mm chamfer; motifs are checked against a 1.0 mm face rule, 12 wait for a redraw (`source/docs/lab/2026-10-04-cap-face-first-layer.md`).
 
 ## rev-b (2026-08-30)
 

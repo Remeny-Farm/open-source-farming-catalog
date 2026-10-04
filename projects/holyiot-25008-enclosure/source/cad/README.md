@@ -118,10 +118,11 @@ copied.
 | `catalog.json` | Schemes, icons, centre/band patterns and fees a patron may choose; the app ships a copy, `test_cap_marking.py` keeps them identical. |
 | `cap_design.py` | Catalog loader, `design_hash` (v2, with zone colours), `validate_design` (zone rules incl. no translucent filament on an opaque zone; retired schemes stay valid), `lock_price`; no build123d, shared by the batch CLI and the tests. |
 | `cap_motifs.py` | Every icon and pattern as a parametric sketch (34 icons, 3 centre, 13 band patterns; the barcode band is seeded by the serial). |
-| `check_motifs.py` | Printability of the whole motif library (erosion/dilation, extents) plus a contact sheet (`--svg`). |
+| `check_motifs.py` | Printability of the whole motif library (erosion/dilation, extents, the 1.0 mm face rule with its `FACE_PENDING` list) plus a contact sheet (`--svg`). |
 | `cap_svg.py` | Sketch → SVG: `out/layout.json` for the app preview, proof SVGs for the batch. |
-| `bambu_project.py` | Pure-Python Bambu Studio plate writer (6 × 6 grid, part extruders, settings template in `bambu/`). |
-| `cap_batch.py` | Batch JSON → plate, manifest, proofs; caches bodies per design hash; runs `slice_check.py` on the plate. |
+| `bambu_project.py` | Pure-Python Bambu Studio plate writer (6 × 6 grid, part extruders, the farm's `PRINT_SETTINGS`, purge volumes and first-layer colour order from the scheme). |
+| `bambu_template.py` | Regenerates `bambu/project_settings.json` from Bambu Studio's own P1S / 0.16mm Optimal / PETG Basic × 4 profiles. Rerun after a Bambu Studio update. |
+| `cap_batch.py` | Batch JSON → plate, manifest, proofs; caches bodies per design hash; runs `slice_check.py` on the plate, which writes the print-ready `.gcode.3mf`. |
 | `test_bambu_project.py`, `test_cap_batch.py` | Writer and batch suites (structure, determinism, refusals, a real slice). |
 | `verify.py` | Interference, fit, bayonet, wall thickness, seal and harness checks. |
 | `slice_check.py` | Real-slicer check: warnings and open-air travel counts per part; `--project` writes the ready-to-print Bambu project. Needs Bambu Studio. |
@@ -168,10 +169,16 @@ sweep helper so their bearing faces share a pitch.
    every offending cap; otherwise it writes `out/plates/plate_<id>_P1S.3mf`,
    `plate_<id>_manifest.csv` (`position,serial,hen_name,design_hash`,
    positions `1A`…`6F`) and `proof/<design_hash>.svg`, then slices the plate
-   through Bambu Studio and reports objects, warnings, the time estimate and
-   which filament slots extruded; it fails unless every assigned slot did.
-3. Open the plate in Bambu Studio. Every part is already on its slot and the
-   slots show the scheme colours: AMS 1 = the scheme's base filament,
+   through Bambu Studio and reports objects, warnings, the time estimate,
+   which filament slots extruded and which the AMS loads; it fails unless
+   every assigned slot did both. A passing plate gets its sliced project next
+   to it, `plate_<id>_P1S.gcode.3mf`.
+3. Print `plate_<id>_P1S.gcode.3mf` as it is: open it in Bambu Studio (it
+   opens in the preview) and send it, or copy it to the printer. Do not
+   re-slice the `.3mf` in the GUI: the 2026-09-29 plate went through the GUI
+   and came out with a 0.12 mm first layer, two walls and variable layer
+   heights (`../docs/lab/2026-10-04-cap-face-first-layer.md`). The slots
+   show the scheme colours: AMS 1 = the scheme's base filament,
    2 = Prusament PETG Clear, 3 = colour a, 4 = colour b (`catalog.json` names
    them; the batch CLI prints the mapping). The patrons' zone choices are in
    the geometry, so load those four spools and print; no per-cap setting
@@ -185,7 +192,11 @@ sweep helper so their bearing faces share a pitch.
 4. Upload the proofs to the app (file name = design hash).
 
 Patterns must survive a 0.4 mm erosion (feature ≥ 0.8 mm) and a 0.4 mm
-dilation without islands merging (gap ≥ 0.8 mm), and every inlay together must
+dilation without islands merging (gap ≥ 0.8 mm). On top of that every motif
+is an inlay on the design face, the first layer, printed in 0.5 mm lines on
+the textured plate, so `check_motifs.py` also asks for islands and gaps of
+1.0 mm; the twelve motifs drawn to the older rule are listed in
+`cap_motifs.FACE_PENDING` until they are redrawn. Every inlay together must
 leave ≥ 60 % of the LED ring (r 8.5–11.5) clear; `cap_marking.py` checks all
 three. Band patterns live in a fixed window (−10°…190°) that clears a 5-digit
 serial by 22°.

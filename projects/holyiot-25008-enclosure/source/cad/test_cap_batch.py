@@ -71,6 +71,18 @@ def lowest_z_per_cap(plate_3mf: Path) -> list[float]:
 
 check(all(abs(z) < 1e-3 for z in lowest_z_per_cap(plate)), "every cap stands on the bed", str(lowest_z_per_cap(plate)))
 
+sliced = plate.with_name(plate.stem + ".gcode.3mf")
+if Path("/Applications/BambuStudio.app/Contents/MacOS/BambuStudio").exists():
+    import zipfile
+    r = subprocess.run(["uv", "run", "--python", "3.12", str(HERE / "slice_check.py"), str(plate)],
+                       capture_output=True, text=True, cwd=HERE)
+    names = zipfile.ZipFile(sliced).namelist() if sliced.exists() else []
+    check(r.returncode == 0 and "Metadata/plate_1.gcode" in names,
+          "the slice check leaves the print-ready .gcode.3mf next to the plate",
+          (r.stdout + r.stderr).strip().splitlines()[-1][-160:] if r.returncode else "")
+else:
+    print("  (Bambu Studio not installed; sliced plate step skipped)")
+
 
 def no_base_on_face(b):
     # No base colour anywhere on the design face: the shell stops short of
@@ -87,6 +99,7 @@ r = run(variant("no_base_on_face", no_base_on_face))
 check(r.returncode == 0 and all(abs(z) < 1e-3 for z in lowest_z_per_cap(plate)),
       "a cap without base colour on its face stands on the bed",
       str(lowest_z_per_cap(plate)) if r.returncode == 0 else (r.stdout + r.stderr)[-300:])
+check(not sliced.exists(), "a new plate removes the old sliced plate")
 
 print("=== refusals ===")
 cases = [

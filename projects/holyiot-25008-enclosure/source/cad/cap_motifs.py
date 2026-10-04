@@ -33,6 +33,16 @@ PATTERN_GAP_MIN = 0.8
 # r 0.1, area 0.03 mm2) while boolean slivers stay far below the cutoff.
 PATTERN_ERODE = 0.35
 SLIVER_AREA = 5e-3
+# The face rule (check_motifs.py): every motif is an inlay on the design face,
+# the first layer, 0.5 mm lines on the textured plate; an island or gap there
+# needs two lines. The motifs below were drawn to 0.8 mm and are waiting for a
+# redraw (docs/lab/2026-10-04-cap-face-first-layer.md); new motifs meet 1.0.
+FACE_MIN = 1.0
+FACE_PENDING = {
+    "icon:clover", "icon:diamond", "icon:rainbow", "centre:rings",
+    "band:arc", "band:barcode", "band:checker", "band:dashes", "band:growing_dots",
+    "band:pixel", "band:sparkle_dots", "band:stripes",
+}
 
 HEART_W = 10.0
 STAR_R = 6.9
