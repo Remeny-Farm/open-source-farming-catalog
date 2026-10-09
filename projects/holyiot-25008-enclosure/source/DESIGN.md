@@ -30,7 +30,7 @@ Parametric two-part enclosure for the Holyiot 25008 tag, generated from code in
 | Assembled mass | **9.92 g** — within the 10 g target (board mass from the manufacturer STEP; cell, holder and ring still estimates) |
 | Orientation | Holder **down** toward the harness, PCB **up**, LED outward |
 | Sealing | Radial NBR O-ring, **ID 26.74 × CS 1.50 mm** |
-| Closure | Bayonet: 3 lugs × 20°, 0.80 mm proud, 30° clockwise onto self-locking helical ramps |
+| Closure | Bayonet: 3 lugs × 20°, 0.80 mm proud, 55° clockwise to the channel end walls over self-locking helical ramps |
 | Material | Transparent PETG. Conductive/CF filament remains prohibited. |
 
 ```
@@ -282,6 +282,14 @@ still locks, just at a different angle. Angular repeatability of the locked
 cap improves from 18° per 0.05 mm of stop-face error (1.0 mm pitch) to about
 4° per 0.05 mm.
 
+**Rest angle (2026-10-09).** The four eggshell test caps all ran on past
+nominal contact to the channel end walls and stopped there, which left the
+number 35° off 6 o'clock. The end wall is now the rest pose. The body's lugs
+sit `lug_phase` = `cam_travel` − `cam_lock` = 25° further round (25/145/265°)
+and the cap is unchanged. Three lugs on a body that is symmetric under a 180°
+flip put the number on a 60° lattice; with the phase it lands at 6 or 12
+o'clock either way round. See lab note `docs/lab/2026-10-09-cap-rest-angle.md`.
+
 What did not change: the radial seal and its groove, the cap OD (31.94 mm),
 the grip scallops, the tabs, the lettering and LED ring, and the assembly
 rule of decision 2. `cap_marking.py` and the accessory-platform proposal
@@ -290,10 +298,13 @@ inherit the new skirt untouched. The thread code is gone from the source
 
 **UNVERIFIED in fit.** The coupon pair has been printed once — dimensions
 good, lock-up angle not yet reported (lab note 2026-09-10, print trial 1).
+The 2026-10-04 caps on revision D bodies turn on to the end wall (lab note
+2026-10-09).
 The coupon pair (`coupon_body`, `coupon_cap`) carries the lugs, the channels and the
 groove at the real parts' z stations; the print trial's two questions are
 whether the cap drops on at the entry slots and at what angle it locks up.
-That angle re-tunes `cam_lock`.
+That angle re-tunes `cam_lock` for caps not yet printed; for printed caps,
+re-tune the body's `lug_phase` instead.
 
 ---
 
@@ -362,10 +373,11 @@ not a cost of the bayonet; it was always there, hidden inside a closed cap.
 The coupons (`coupon_body.stl` 1.70 g, `coupon_cap.stl` 1.22 g) carry the
 bayonet pair and the groove and nothing else, at the real parts' z stations.
 **The bayonet fit has not been printed anywhere yet**, so print the pair
-first. If the cap locks up well before 30° the parts are tight; if it reaches
-the end wall still loose they are slack — either way report the angle and
-change `cam_lock` (or `fit_lug_r` if the lugs bind radially) in the source and
-regenerate; do not file the parts.
+first. The cap should turn 55° to the end wall, where it rests (2026-10-09). If
+it locks up well before that the parts are tight. Report the angle and change
+`lug_phase` on the body (`cam_lock` moves the cap's channels, so it is for caps
+not yet printed), or `fit_lug_r` if the lugs bind radially, then regenerate;
+do not file the parts.
 
 ---
 
@@ -383,18 +395,19 @@ regenerate; do not file the parts.
 4. Stick the OD 16 × ID 12 × 2.0 mm foam ring centred on the cap ceiling,
    under the core disc; the centre switch stays inside its hole.
 5. Fit the O-ring into the cap's internal groove.
-6. Turn the cap about 30° anticlockwise from its final position so the entry
+6. Turn the cap about 55° anticlockwise from its final position so the entry
    slots sit over the three lugs, press it straight down over the seal band
-   until the skirt meets the base flange, then turn it clockwise until it
-   stops turning freely — about 30°. Hand-tight is enough; the ramp is
-   self-locking and the radial seal does not need more.
+   until the skirt meets the base flange, then turn it clockwise to the stop,
+   about 55°. Of the three ways the slots fit over the lugs, pick the one
+   that ends with the number at 6 o'clock. Hand-tight is enough; the stop is
+   the channel end wall, and the radial seal does not need more.
 7. Thread the elastic through each side tab's slot and back around the bar.
 
 ---
 
 ## Verification Performed
 
-`cad/verify.py`, 39 machine checks (48 with `--board-step`), all passing. Notable ones:
+`cad/verify.py`, 40 machine checks (49 with `--board-step`), all passing. Notable ones:
 
 - body/cap collision: **0.000 mm³** at the assembled position
 - board vs. enclosure interference: **0.0000 mm³**
@@ -404,6 +417,8 @@ regenerate; do not file the parts.
 - cap drops on at the entry angle and the lugs run free for 0–28°: **0.000 mm³**
   overlap at every step
 - ramp wedges past the lock angle: **0.498 mm³** interference at +4°, the cap tightens
+- cap rests on the end walls: clear 1° short of the rest pose, **0.026 mm³**
+  in the wall 2° past it (the old 0° lug phase gives 0.000 mm³)
 - locked cap retained: **6.08 mm³** lug/lip overlap when lifted 0.6 mm; at the
   entry angle it lifts off clean
 - cap bore clears the seal band: +0.10 mm (the rule that caught decision 2)
@@ -489,8 +504,9 @@ has touched it, no elastic has loaded a tab, and no hen has worn it.
 - Board part mass 0.18 g (volume at an assumed 2.5 g/cm³); holder mass 0.6 g and O-ring mass 0.4 g, both estimates that the 10 g budget
   argument depends on.
 - Elastic cross-section fitting an 8.6 × 2.0 mm channel.
-- The bayonet fit: `fit_lug_r` 0.15, `fit_lug_z` 0.30, lock-up at 30°. Modelled,
-  no coupon printed.
+- The bayonet fit: `fit_lug_r` 0.15, `fit_lug_z` 0.30, ramp contact at 30°. The
+  caps rest on the end wall at 55° (four caps, 2026-10-09); the axial play
+  there is unmeasured.
 
 ### Unknown
 
@@ -503,9 +519,9 @@ has touched it, no elastic has loaded a tab, and no hen has worn it.
 
 ## Open Questions & Next Steps
 
-1. **Print the bayonet coupon pair** and report whether the cap drops on at
-   the entry slots and at what angle it locks up (nominal 30°, usable 5–55°);
-   that angle re-tunes `cam_lock`. Then the full cap: that the LED is actually
+1. **Print a body with the turned lugs** and check that the 2026-10-04 test
+   caps stop with the number at 6 o'clock (lab note 2026-10-09). Then the
+   full cap: that the LED is actually
    visible through the Ø16 foam window, and that a tab survives being loaded
    with an elastic. The revision B body has already accepted the board.
 2. **Measure the total stack height** in one caliper span and the assembly mass
