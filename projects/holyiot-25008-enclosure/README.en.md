@@ -17,7 +17,7 @@ Two-part transparent PETG enclosure for the Holyiot 25008 BLE module (Nordic nRF
 | Assembled envelope | 40.14 × 31.94 × 8.70 mm (Ø31.94 body, tabs to 40.14) |
 | Printed mass (PETG) | 5.01 g (body 2.71 g, cap 2.30 g) |
 | Seal | Radial NBR O-ring, ID 26.74 × CS 1.50 mm |
-| Closure | Three-lug bayonet, 30° clockwise onto self-locking ramps |
+| Closure | Three-lug bayonet, 55° clockwise to a hard stop over self-locking ramps |
 | Material | Transparent PETG |
 
 ## Files

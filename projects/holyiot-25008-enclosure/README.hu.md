@@ -17,7 +17,7 @@ Kétrészes, átlátszó PETG tok a Holyiot 25008 BLE modulhoz (Nordic nRF54L15,
 | Összeszerelt befoglaló méret | 40,14 × 31,94 × 8,70 mm (Ø31,94 ház, fülekkel 40,14) |
 | Nyomtatott tömeg (PETG) | 5,01 g (ház 2,71 g, kupak 2,30 g) |
 | Tömítés | Radiális NBR O-gyűrű, belső átmérő 26,74 × keresztmetszet 1,50 mm |
-| Zárás | Háromkörmös bajonett, 30° jobbra, önzáró rámpákra |
+| Zárás | Háromkörmös bajonett, 55° jobbra ütközésig, önzáró rámpákon |
 | Anyag | Átlátszó PETG |
 
 ## Fájlok

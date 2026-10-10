@@ -246,8 +246,24 @@ class Params:
         return self.cam_travel + self.lug_arc / 2
 
     def lug_angle(self, i: int) -> float:
-        """Centre of lug i in the body frame; lug 0 sits on the tab axis."""
+        """Centre of lug i at nominal ramp contact, in the cap's frame; the cap
+        channels are laid out from it. The body carries its lugs lug_phase
+        further round (body_lugs)."""
         return 360.0 * i / self.lug_n
+
+    @property
+    def lug_phase(self) -> float:
+        """How far the body's lugs sit past nominal contact: the cap rests on
+        the channel end walls, not on the ramp.
+
+        All four eggshell test caps of 2026-10-04 turned on past nominal
+        contact to the end walls, and stopped there repeatably (photos
+        2026-10-09: +31.7..+37.4 deg on the 60 deg lattice point at +35, i.e.
+        the end wall). The cap is modelled with its number at 6 o'clock, so
+        turning only the body's lugs by the leftover travel puts that pose on
+        the stop. Printed caps keep fitting; their channels do not move.
+        """
+        return self.cam_travel - self.cam_lock
 
     def chamfer_rise(self, run: float) -> float:
         return math.tan(math.radians(self.chamfer_deg)) * run
@@ -391,7 +407,7 @@ def body_lugs(p: Params) -> bd.Solid:
     lugs = None
     for i in range(p.lug_n):
         lug = helical_sector(prof, p.r_lug - 0.4,
-                             p.lug_angle(i) - p.lug_arc / 2, p.lug_arc,
+                             p.lug_angle(i) + p.lug_phase - p.lug_arc / 2, p.lug_arc,
                              p.cam_pitch, p.lug_z - p.cam_rate * p.lug_arc / 2)
         lugs = lug if lugs is None else lugs + lug
     return lugs - cyl(p.r_lug + 1, 5, z=p.lug_z + p.lug_h)
@@ -400,8 +416,8 @@ def body_lugs(p: Params) -> bd.Solid:
 def cap_channels(p: Params) -> tuple[bd.Solid, bd.Solid]:
     """The cap's L-channels: (material to cut, lips to add back).
 
-    Built in the cap's LOCKED orientation, so the cap solid is already in its
-    assembled pose. For lug i at angle a: the entry slot is centred at
+    Built in the cap's assembled pose, resting on the end walls, where the
+    body's lugs sit (lug_phase). For lug i at angle a: the entry slot is centred at
     a - cam_lock (the cap turns clockwise to lock), full height from the
     skirt's open end to z_chan_hi; the circumferential leg runs from the slot
     to the end wall at a - cam_lock + chan_end. Under the leg sits the lip, a
@@ -609,7 +625,8 @@ def main() -> None:
           f"{p.lug_d:.2f} mm proud at z {p.lug_z:.2f}-{p.lug_z + p.lug_h:.2f}, "
           f"low on the body")
     lo, hi = p.cam_window
-    print(f"  lock               {p.cam_lock:.0f} deg clockwise; ramp "
+    print(f"  lock               {p.cam_travel:.0f} deg clockwise to the end wall "
+          f"(ramp contact at {p.cam_lock:.0f}); ramp "
           f"{p.cam_rate * 1000:.0f} um/deg ({p.helix_deg:.1f} deg helix, "
           f"self-locking), absorbs {lo:+.2f}..{hi:+.2f} mm of print error")
     print(f"  cap outer dia      {2 * p.r_cap_out:.2f} mm")
