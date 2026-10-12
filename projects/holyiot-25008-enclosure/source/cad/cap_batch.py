@@ -14,6 +14,9 @@ database:
     plate_<batch_id>_P1S.3mf        Bambu Studio project, 6 x 6 grid, AMS 1 base
                                     / 2 clear / 3 a / 4 b in the scheme colours,
                                     print settings baked in
+    plate_<batch_id>_P1S.gcode.3mf  the same plate sliced, written only when the
+                                    slice check passes: open and print it as it
+                                    is, nothing to set (not with --no-slice)
     plate_<batch_id>_manifest.csv   position, serial, hen name, design hash
     proof/<design_hash>.svg         top view in the scheme colours, one per cap
 
@@ -157,6 +160,8 @@ def main() -> int:
         print(f"  cap {c['serial']:>5} at {rows[-1][0]}  {'cache' if hit else 'built'}")
 
     plate = out / f"plate_{batch['batch_id']}_P1S.3mf"
+    # A sliced plate from an earlier run must not sit next to a new plate.
+    plate.with_name(plate.stem + ".gcode.3mf").unlink(missing_ok=True)
     write_plate(plate, plate_caps, scheme, cat["window"], batch["batch_id"])
     with open(out / f"plate_{batch['batch_id']}_manifest.csv", "w", newline="") as f:
         w = csv.writer(f)

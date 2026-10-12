@@ -7,17 +7,19 @@
 Mirrors the package the CLI writes (see out/cap_67_P1S.3mf): one assembly
 object per cap in 3D/3dmodel.model, its mesh bodies (up to four) in
 3D/Objects/object_<k>.model, per-part extruders in
-Metadata/model_settings.config, and a full project_settings.config copied
-from bambu/project_settings.json (the P1S 0.4 / 0.16 mm / PETG Basic project
-Bambu Studio itself exported, widened to four filaments, on the Textured PEI
-plate, with the three settings DESIGN.md asks for) with the scheme's filament
-colours patched in.
+Metadata/model_settings.config, and a full project_settings.config: Bambu's
+own P1S 0.4 / 0.16mm Optimal / PETG Basic x 4 export from
+bambu/project_settings.json (bambu_template.py regenerates it), the farm's
+deviations in PRINT_SETTINGS, the scheme's colours in AMS slots 1-4, and the
+purge volumes and first-layer colour order those colours call for.
 
 Deterministic: fixed zip timestamps, uuid5 ids, sorted keys -- the same batch
 produces a byte-identical plate.
 """
 
+import colorsys
 import json
+import math
 import re
 import struct
 import uuid
@@ -51,7 +53,36 @@ BODIES = tuple(BODY_EXTRUDER)
 # that is silently dropped (observed: 26 of 36 sliced). The version is the
 # one the settings template in bambu/ was exported from.
 BAMBU_APPLICATION = "BambuStudio-02.08.02.60"
-RECOMMENDED = {"wall_loops": "3", "wall_generator": "arachne", "reduce_crossing_wall": "1"}
+# Where this generator departs from Bambu's profiles, and the few Bambu values
+# the cap face depends on, pinned so a template refresh cannot move them. A
+# list-valued setting takes the value for every entry.
+PRINT_SETTINGS = {
+    # the bayonet (DESIGN.md)
+    "wall_loops": "3", "wall_generator": "arachne", "reduce_crossing_wall": "1",
+    # Textured PEI: the P1S start G-code lowers the nozzle 0.04 mm for it,
+    # which fuses the face's short wall loops, and the texture gives an even
+    # matte face. The smooth Engineering Plate printed them rope-like
+    # (docs/lab/2026-10-12-cap-plate-engineering-plate.md).
+    "curr_bed_type": "Textured PEI Plate",
+    # The design face is the first layer and prints against the textured
+    # plate (docs/lab/2026-10-04-cap-face-first-layer.md).
+    "initial_layer_print_height": "0.2",    # pinned; the GUI print ran 0.12
+    "initial_layer_line_width": "0.5",      # pinned
+    "initial_layer_flow_ratio": "1.05",     # PETG Basic's 0.95 back to 1.0 on the face
+    "initial_layer_speed": "30",
+    "initial_layer_infill_speed": "35",
+    "bottom_surface_pattern": "monotonic",  # pinned
+    "elefant_foot_compensation": "0.15",    # pinned
+    "brim_type": "no_brim",                 # a brim would bond to the face's edge
+    # Prime tower in the 22 mm strip right of the grid (the last column of
+    # caps ends at x 233.97): 14 mm plus a 1 mm brim keeps every tower line
+    # inside x 236-253. Colour changes stop at the top of the 1.1 mm top
+    # plate, so the tower is about seven layers tall.
+    "enable_prime_tower": "1", "prime_tower_width": "14", "prime_tower_brim_width": "1",
+    "prime_tower_rib_wall": "0", "wipe_tower_x": "237.5", "wipe_tower_y": "60",
+}
+# Bambu Studio's cap on a single purge, mm3 (libslic3r/FlushVolCalc.cpp).
+FLUSH_MAX = 900
 
 
 def grid_positions(n: int) -> list[tuple[float, float]]:
@@ -88,9 +119,10 @@ def assigned_slots(plate: Path) -> set[int]:
 
 def project_settings(scheme: dict, window: dict) -> dict:
     """The project_settings.config for a cap project: the template with the
-    P1S bed, the scheme's colours in AMS slots 1-4 (base, clear, a, b) and
-    the DESIGN.md settings. Shared by the batch plate and the single-cap
-    project so both open with four filaments."""
+    P1S bed, the scheme's colours in AMS slots 1-4 (base, clear, a, b),
+    PRINT_SETTINGS, and the purge volumes and first-layer order for those
+    colours. Shared by the batch plate and the single-cap project so both
+    open with four filaments."""
     cfg = json.loads(TEMPLATE.read_text())
     cfg["printable_area"], cfg["bed_exclude_area"] = P1S_PRINTABLE_AREA, P1S_EXCLUDE
     # Bambu Studio counts the project's filaments from the per-filament
@@ -106,8 +138,77 @@ def project_settings(scheme: dict, window: dict) -> dict:
             raise SystemExit(f"template {TEMPLATE.name}: {key} has {len(value)} entries, "
                              f"expected {len(BODIES)}")
     cfg["filament_colour"] = colours
-    cfg.update(RECOMMENDED)
+    for key, value in PRINT_SETTINGS.items():
+        if key not in cfg:
+            raise SystemExit(f"template {TEMPLATE.name} has no setting {key!r}")
+        cfg[key] = [value] * len(cfg[key]) if isinstance(cfg[key], list) else value
+    cfg["flush_volumes_matrix"] = [str(v) for row in flush_matrix(colours, cfg) for v in row]
+    cfg["first_layer_print_sequence"] = [str(s) for s in first_layer_order(colours)]
     return cfg
+
+
+def _luminance(rgb: tuple[float, float, float]) -> float:
+    r, g, b = rgb
+    return r * 0.3 + g * 0.59 + b * 0.11
+
+
+def _rgb(hex_colour: str) -> tuple[float, float, float]:
+    h = hex_colour.lstrip("#")
+    return tuple(int(h[i:i + 2], 16) / 255 for i in (0, 2, 4))
+
+
+def flush_floor(cfg: dict, slot: int) -> int:
+    """The smallest purge Bambu Studio allows after `slot` (0-based), mm3: the
+    nozzle volume less the filament the cutter retraction already pulled out
+    (Plater.cpp get_min_flush_volumes). 107 - 18 mm of 1.75 mm filament = 63
+    for PETG Basic on the P1S."""
+    level = int(cfg["enable_long_retraction_when_cut"])        # 2 = per filament
+    retract = 0
+    if level and cfg["long_retractions_when_cut"][0] == "1":
+        retract = int(float(cfg["retraction_distances_when_cut"][0]))
+    if cfg["filament_long_retractions_when_cut"][slot] == "0":
+        retract = 0
+    elif level == 2:
+        retract = int(float(cfg["filament_retraction_distances_when_cut"][slot]))
+    return int(int(float(cfg["nozzle_volume"][0])) - math.pi * 1.75 * 1.75 / 4 * retract)
+
+
+def flush_volume(src: str, dst: str, floor: int) -> int:
+    """Purge for a change from colour src to dst, mm3, as Bambu Studio 02.08
+    computes it from the two colours (libslic3r/FlushVolCalc.cpp): hue and
+    saturation distance and the luminance step, a step towards light costing
+    far more than one towards dark, plus the floor. It reproduces every pair
+    Bambu Studio recalculated for the 2026-09-29 plate."""
+    s, d = _rgb(src), _rgb(dst)
+    (h1, s1, v1), (h2, s2, v2) = colorsys.rgb_to_hsv(*s), colorsys.rgb_to_hsv(*d)
+    h1, h2 = 2 * math.pi * h1, 2 * math.pi * h2
+    hs = min(1.2, math.hypot(math.cos(h1) * s1 * v1 - math.cos(h2) * s2 * v2,
+                             math.sin(h1) * s1 * v1 - math.sin(h2) * s2 * v2))
+    l_src, l_dst = _luminance(s), _luminance(d)
+    if l_dst >= l_src:
+        lumi = (l_dst - l_src) ** 0.7 * 560
+    else:
+        lumi = (l_src - l_dst) * 80
+        hs = min(0.67 * v2 + 0.33 * v1, hs)
+    a, b = 230 * hs, lumi
+    predicted = max(math.sqrt(a * a + b * b + a * b), 60.0)     # third side, 120 deg apart
+    return min(int(int(predicted) + floor), FLUSH_MAX)
+
+
+def flush_matrix(colours: list[str], cfg: dict) -> list[list[int]]:
+    """Row = from slot, column = to slot, as Bambu stores flush_volumes_matrix."""
+    return [[0 if i == j else flush_volume(a, b, flush_floor(cfg, i)) for j, b in enumerate(colours)]
+            for i, a in enumerate(colours)]
+
+
+def first_layer_order(colours: list[str]) -> list[int]:
+    """AMS slots (1-based) for the first layer, the design face: the clear
+    window first, then lightest to darkest, so no change on the face goes from
+    a dark colour to a lighter one."""
+    clear = BODY_EXTRUDER["window"] - 1
+    rest = sorted((i for i in range(len(colours)) if i != clear),
+                  key=lambda i: (-_luminance(_rgb(colours[i])), i))
+    return [clear + 1] + [i + 1 for i in rest]
 
 
 def _uid(*parts: str) -> str:

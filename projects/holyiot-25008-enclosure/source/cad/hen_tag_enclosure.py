@@ -77,6 +77,7 @@ class Params:
     floor_t: float = 1.00
     cap_wall: float = 1.10
     cap_top_t: float = 1.10
+    face_chamfer: float = 0.30   # radial inset of the design face's edge, at chamfer_deg
 
     # --- Bayonet closure, UNVERIFIED (modelled 2026-09-10, no coupon yet) ---
     # Three lugs on the body's seal band, three L-channels in the cap skirt:
@@ -585,6 +586,17 @@ def build_cap(p: Params = P, foam_gap: tuple[float, float] | None = None,
                       math.sin(a) * (p.r_cap_out + 1.15), z0) * bd.Cylinder(
             1.4, top - z0,
             align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN))
+
+    # Face chamfer. The design face prints against the bed, where the first
+    # layer squashes outward into a lip; a 0.30 mm chamfer at chamfer_deg
+    # (self-supporting, flipped) keeps that edge inside the outline and reads
+    # as a coin edge. It starts outboard of every marking (TOP_R_MAX 15.60).
+    t, e = math.tan(math.radians(p.chamfer_deg)), 0.1
+    r0 = p.r_cap_out - p.face_chamfer
+    profile = bd.Plane.XZ * bd.Polygon(
+        (r0 - e / t, top + e), (p.r_cap_out + 2, top + e),
+        (p.r_cap_out + 2, top - (p.r_cap_out + 2 - r0) * t), align=None)
+    cap -= bd.revolve(profile, bd.Axis.Z)
 
     return cap
 
