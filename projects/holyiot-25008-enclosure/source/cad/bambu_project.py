@@ -68,6 +68,10 @@ PRINT_SETTINGS = {
     "initial_layer_print_height": "0.2",    # pinned; the GUI print ran 0.12
     "initial_layer_line_width": "0.5",      # pinned
     "initial_layer_flow_ratio": "1.05",     # PETG Basic's 0.95 back to 1.0 on the face
+    # One wall on the face: three walls round every motif hole leave short
+    # loops that need the textured plate's extra squish to fuse; on the
+    # Engineering Plate they print rope-like (2026-10-12 lab note).
+    "only_one_wall_first_layer": "1",
     "initial_layer_speed": "30",
     "initial_layer_infill_speed": "35",
     "bottom_surface_pattern": "monotonic",  # pinned
