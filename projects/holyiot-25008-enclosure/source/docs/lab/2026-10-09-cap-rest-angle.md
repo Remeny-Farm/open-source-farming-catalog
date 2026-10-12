@@ -2,7 +2,7 @@
 
 - **Date**: 2026-10-09
 - **Author**: Hen-Tag Engineering
-- **Status**: Fixed in the body (lugs turned 25°). Caps unchanged. No body printed with the fix yet.
+- **Status**: Fixed in the body (lugs turned 25°) and confirmed on a printed body (2026-10-12). Caps unchanged.
 
 ---
 
@@ -37,6 +37,14 @@ Geometry, measured on the printed plate's 3MF and on the body STLs:
 - body lugs at 0/120/240°, lug 0 on the tab axis
 - cap entry slots at −30/90/210°
 - the number at 270°
+
+### Printed body with the turned lugs (2026-10-12)
+
+One body from `plate_2026-10-12-body-test_P1S.gcode.3mf` (the fix, lugs at
+25/145/265°), Prusament PETG Clear on the Textured PEI Plate. A 2026-10-04
+test cap screwed on stopped with its number at 6 o'clock (operator,
+2026-10-12: "perfect"). Which test caps were tried is not recorded, and the
+angle was not measured from a photo.
 
 ---
 
@@ -84,7 +92,7 @@ Geometry, measured on the printed plate's 3MF and on the body STLs:
 
 ## Open
 
-- Print one body with the turned lugs. Check that the four test caps stop
-  with the number at 6 o'clock.
+- Done 2026-10-12: a printed body with the turned lugs puts a test cap's
+  number at 6 o'clock (above).
 - The axial play at the stop has not been measured; the foam ring takes it up.
   If a cap rattles at the stop, report it before changing anything.

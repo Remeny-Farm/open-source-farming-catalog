@@ -288,7 +288,9 @@ number 35° off 6 o'clock. The end wall is now the rest pose. The body's lugs
 sit `lug_phase` = `cam_travel` − `cam_lock` = 25° further round (25/145/265°)
 and the cap is unchanged. Three lugs on a body that is symmetric under a 180°
 flip put the number on a 60° lattice; with the phase it lands at 6 or 12
-o'clock either way round. See lab note `docs/lab/2026-10-09-cap-rest-angle.md`.
+o'clock either way round. A printed body with the turned lugs puts a test
+cap's number at 6 o'clock (operator, 2026-10-12). See lab note
+`docs/lab/2026-10-09-cap-rest-angle.md`.
 
 What did not change: the radial seal and its groove, the cap OD (31.94 mm),
 the grip scallops, the tabs, the lettering and LED ring, and the assembly
@@ -519,11 +521,10 @@ has touched it, no elastic has loaded a tab, and no hen has worn it.
 
 ## Open Questions & Next Steps
 
-1. **Print a body with the turned lugs** and check that the 2026-10-04 test
-   caps stop with the number at 6 o'clock (lab note 2026-10-09). Then the
-   full cap: that the LED is actually
-   visible through the Ø16 foam window, and that a tab survives being loaded
-   with an elastic. The revision B body has already accepted the board.
+1. **Check the full cap**: that the LED is actually visible through the Ø16
+   foam window, and that a tab survives being loaded with an elastic. The
+   revision B body has already accepted the board, and a body with the
+   turned lugs puts a test cap's number at 6 o'clock (lab note 2026-10-09).
 2. **Measure the total stack height** in one caliper span and the assembly mass
    on a scale. Both feed straight back into `Params`.
 3. **Source the O-ring** at ID 26.74 × CS 1.50 mm, or report the nearest stock
