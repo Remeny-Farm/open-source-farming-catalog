@@ -182,7 +182,8 @@ sweep helper so their bearing faces share a pitch.
    2 = Prusament PETG Clear, 3 = colour a, 4 = colour b (`catalog.json` names
    them; the batch CLI prints the mapping). The patrons' zone choices are in
    the geometry, so load those four spools and print; no per-cap setting
-   exists. The plate carries the `Bambu PETG Basic @BBL X1C` preset in all
+   exists. The plate is sliced for the Engineering Plate at 70 °C: put that
+   plate in and glue it first, Bambu requires glue on it for every material. The plate carries the `Bambu PETG Basic @BBL X1C` preset in all
    four slots whatever the scheme (Prusament, Bambu PETG Basic, or Bambu
    PETG Translucent in `lavender`'s slot 4): temperatures and flow come from
    that preset, the AMS mapping on the printer decides which spool feeds
@@ -193,8 +194,8 @@ sweep helper so their bearing faces share a pitch.
 
 Patterns must survive a 0.4 mm erosion (feature ≥ 0.8 mm) and a 0.4 mm
 dilation without islands merging (gap ≥ 0.8 mm). On top of that every motif
-is an inlay on the design face, the first layer, printed in 0.5 mm lines on
-the textured plate, so `check_motifs.py` also asks for islands and gaps of
+is an inlay on the design face, the first layer, printed in 0.5 mm lines
+against the bed, so `check_motifs.py` also asks for islands and gaps of
 1.0 mm; the twelve motifs drawn to the older rule are listed in
 `cap_motifs.FACE_PENDING` until they are redrawn. Every inlay together must
 leave ≥ 60 % of the LED ring (r 8.5–11.5) clear; `cap_marking.py` checks all

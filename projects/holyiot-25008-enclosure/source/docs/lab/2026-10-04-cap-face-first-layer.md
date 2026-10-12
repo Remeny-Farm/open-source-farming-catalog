@@ -2,7 +2,7 @@
 
 - **Date**: 2026-10-04
 - **Author**: Hen-Tag Engineering
-- **Status**: Fixed in the generator; verified by slicer (CLI) and the test suites. Test plate not printed yet.
+- **Status**: Fixed in the generator; verified by slicer (CLI) and the test suites. Test plate printed and accepted; cap plates moved to the Engineering Plate (`2026-10-12-cap-plate-engineering-plate.md`).
 
 ---
 

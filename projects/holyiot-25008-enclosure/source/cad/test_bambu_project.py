@@ -70,8 +70,9 @@ check(cfg["filament_colour"] == ["#FFFFFF", "#E6EDF1", "#4F2C1D", "#DBC8B6"]
       and cfg["filament_type"] == ["PETG"] * 4
       and all(len(v) == 4 for k, v in cfg.items() if k.startswith("filament_") and isinstance(v, list)),
       "scheme colours in slots 1-4, every per-filament array four wide")
-check(cfg["curr_bed_type"] == "Textured PEI Plate" and cfg["layer_height"] == "0.16",
-      "PETG-capable plate, 0.16 mm layers")
+check(cfg["curr_bed_type"] == "Engineering Plate" and cfg["eng_plate_temp"] == ["70"] * 4
+      and cfg["layer_height"] == "0.16",
+      "Engineering Plate at PETG Basic's 70 C, 0.16 mm layers")
 # The template is Bambu's own P1S, not libslic3r's default printer: that one
 # starts with a bare G28 and never changes filament (2026-10-04).
 check(cfg["single_extruder_multi_material"] == "1" and "M620" in cfg["change_filament_gcode"]
