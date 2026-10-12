@@ -13,7 +13,7 @@ first run. No virtualenv, and nothing is installed into the repository.
 
 ```sh
 uv run --python 3.12 hen_tag_enclosure.py   # build + export to out/
-uv run --python 3.12 verify.py              # 39 machine checks + half sections (+9 with --board-step)
+uv run --python 3.12 verify.py              # 40 machine checks + half sections (+9 with --board-step)
 uv run --python 3.12 slice_check.py         # real-slicer check, needs Bambu Studio
 ```
 
@@ -206,19 +206,21 @@ assembly-path defect described in `../DESIGN.md`.
 
 ## Bayonet fit
 
-Print the coupons and note where the cap stops turning freely. Nominal is 30°
-clockwise from the entry slots; anywhere from about 5° to 55° still locks. Then
+Print the coupons and note where the cap stops turning. Ramp contact is 30°
+clockwise from the entry slots and the end wall 55°. The caps rest on the end
+wall (2026-10-09), so that is where the body's lugs put the number at 6
+o'clock (`lug_phase`). A cap that stops much earlier means tight parts. Then
 adjust and regenerate — do not file the parts:
 
 ```python
-cam_lock   = 30.0   # deg of rotation to nominal contact: raise if it locks early, lower if late
+cam_lock   = 30.0   # deg of rotation to nominal contact; moves the cap's channels: new caps only
 fit_lug_r  = 0.15   # radial clearance, lug crest to channel root: raise if the lugs bind
 fit_lug_z  = 0.30   # axial clearance, lug top to channel ceiling
 cam_rate   = 0.012  # ramp rise per degree; lower for a longer, softer tightening
 ```
 
-Note for anyone extending this: the cap is modelled in its **locked** pose, so
-the cap solid is already the assembled one. `verify.py` turns it back toward
+Note for anyone extending this: the cap is modelled in its **resting** pose, on
+the channel end walls, so the cap solid is already the assembled one. `verify.py` turns it back toward
 the entry angle (`pose(phi)`) to prove the drop-on, the free run and the wedge.
 Lugs and lips are swept along helices of the same pitch; change `cam_rate` and
 both follow.

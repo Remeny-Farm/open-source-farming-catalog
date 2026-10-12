@@ -11,7 +11,8 @@ Checks nobody can eyeball reliably:
   4. is there head clearance over the switch, and does the foam ring bear on
      the board while clearing the switch and the LED?
   5. does the bayonet work -- cap drops on at the entry angle, lugs run free
-     to the lock angle, the ramp then wedges, and the locked cap cannot be
+     to the lock angle, the ramp then wedges, the cap comes to rest on the
+     end walls with its number at 6 o'clock, and the locked cap cannot be
      pulled off?
   6. is every wall thick enough to print watertight?
   7. do the harness tabs take an 8 mm elastic, and is the underside flat?
@@ -34,7 +35,7 @@ import build123d as bd
 sys.path.insert(0, str(Path(__file__).parent))
 import board_holyiot_25008 as brd  # noqa: E402
 from hen_tag_enclosure import (  # noqa: E402
-    OUT, P, build_body, build_cap, cyl,
+    OUT, P, body_lugs, build_body, build_cap, cyl, ring,
 )
 
 ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -73,7 +74,9 @@ pcb = (cyl(p.r_pcb, p.pcb_t, z=p.z_pcb_bottom)
 board = holder + pcb
 
 print("\n--- 1. assembly interference -----------------------------------------")
-clash_vol = vol(body & cap)
+# The cap is modelled resting on the end walls, past nominal contact; collide
+# it at nominal contact, where the lug and lip flats just meet.
+clash_vol = vol(body & (bd.Rot(0, 0, p.lug_phase) * cap))
 check(clash_vol < 1.0, "body/cap collision, locked",
       f"{clash_vol:.3f} mm3 overlap (lugs should touch the lips, not fight)")
 
@@ -149,13 +152,14 @@ if args.board_step:
           f"top z {bb.max.Z:.2f} vs ceiling z {p.z_ceiling:.2f}")
 
 print("\n--- 5. bayonet closure -----------------------------------------------")
-# The cap is modelled in its locked pose. pose(phi) turns it back toward the
-# entry angle: phi = 0 is lugs-in-the-entry-slots, phi = cam_lock is nominal
-# contact. dz lifts it off the flange.
+# The cap is modelled resting on the channel end walls. pose(phi) turns it back
+# toward the entry angle: phi = 0 is lugs-in-the-entry-slots, phi = cam_lock is
+# nominal contact, phi = cam_lock + lug_phase is the rest pose. dz lifts it off
+# the flange.
 
 
 def pose(phi: float, dz: float = 0.0) -> bd.Solid:
-    return bd.Pos(0, 0, dz) * (bd.Rot(0, 0, p.cam_lock - phi) * cap)
+    return bd.Pos(0, 0, dz) * (bd.Rot(0, 0, p.cam_lock + p.lug_phase - phi) * cap)
 
 
 def clash(phi: float, dz: float = 0.0) -> float:
@@ -185,7 +189,18 @@ lift = clash(0.0, 1.0)
 check(lift < 0.01, "cap lifts off at the entry angle",
       f"{lift:.3f} mm3 overlap when lifted 1.0 mm")
 
-# e) geometry the sweep cannot express
+# e) the cap's modelled pose -- number at 6 o'clock -- is the end-wall stop.
+# Probed just outside the bore and above the lips, where only the end wall can
+# meet a lug: clear one degree short of the rest pose, in the wall past it.
+probe = ring(p.r_cap_seal_bore + 0.15, p.r_cap_seal_bore, 0.45, p.lug_z + 0.80)
+lugs = body_lugs(p) & probe
+rest = p.cam_lock + p.lug_phase
+short, past = vol(lugs & pose(rest - 1.0)), vol(lugs & pose(rest + 2.0))
+check(short < 0.001 and past > 0.005, "cap rests on the end walls",
+      f"{short:.3f} mm3 at -1 deg, {past:.3f} mm3 at +2 deg: the number lands "
+      f"at 6 o'clock ({rest:.0f} deg from the entry slots)")
+
+# f) geometry the sweep cannot express
 check(p.helix_deg < 6.0, "ramp is self-locking",
       f"{p.helix_deg:.1f} deg helix angle (PETG friction angle ~11 deg)")
 lo, hi = p.cam_window

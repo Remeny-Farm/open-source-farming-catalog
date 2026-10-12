@@ -60,7 +60,7 @@ This document specifies the mechanical design criteria, material selection, seal
   diameter, so it does not depend on how hard the cap is tightened — which is
   what the superseded design needed a stop flange to control.
 - **Closure**: Three-lug bayonet — 0.80 mm lugs on the body, self-locking
-  helical ramps in the cap, 30° clockwise to lock — positioned **below** the
+  helical ramps in the cap, 55° clockwise to the end-wall stop — positioned **below** the
   seal so the O-ring never crosses the lugs. Replaced the Tr28.6 × 1.0 thread
   on 2026-09-10 after caps tore along it; see
   [`DESIGN.md`](../DESIGN.md#9-bayonet-not-a-thread) decision 9 and
