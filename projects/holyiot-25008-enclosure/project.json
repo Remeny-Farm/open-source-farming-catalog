@@ -35,7 +35,7 @@
     { "path": "source/README.md", "sha256": "9e6de52001758f93e05f33d6d702f410993aceb133eaae0b90c16f96231ac636", "role": "documentation" },
     { "path": "source/DESIGN.md", "sha256": "7168e074257ffa64529f3d50e6fe5c17de8f70a136e77ba3104f5282ffcab29e", "role": "documentation" },
     { "path": "source/docs/requirements.md", "sha256": "371db281558f873a164c2e2e04bed74017336c93f5acb1b4c0cdee72117d036e", "role": "documentation" },
-    { "path": "source/cad/README.md", "sha256": "e1cee02b04d5b9854603608f4fb6a3bd3c68e78dbf50bfb9d19f7f40d060cd4f", "role": "documentation" },
+    { "path": "source/cad/README.md", "sha256": "b38960d29bdc399f66957e2e6dbccf87c121115164c232da2606cb4a0841cdf2", "role": "documentation" },
     { "path": "source/docs/lab/2026-08-28-enclosure-board-measurements.md", "sha256": "3e96ea66f1097c2d11958c45999db62c381f73b13f08595b9cfbc3f3e2d29b26", "role": "evidence" },
     { "path": "source/docs/lab/2026-08-28-enclosure-print-trial.md", "sha256": "5f6f72452cbf9bbc037ccffa17a7c05e1695443dac6ee4a96bf2d4017d3e2bbb", "role": "evidence" },
     { "path": "source/docs/lab/2026-08-30-enclosure-led-window.md", "sha256": "b0655c5f051f08351315a868324fecb9ba6e9cae899720a2a0bb41bc340cc0f9", "role": "evidence" },

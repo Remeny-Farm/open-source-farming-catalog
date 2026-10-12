@@ -1,8 +1,8 @@
-# Lab Note: Cap Plates Move to the Engineering Plate
+# Lab Note: Cap Plates on the Engineering Plate, Back to Textured PEI
 
 - **Date**: 2026-10-12
 - **Author**: Hen-Tag Engineering
-- **Status**: Generator switched; the face's first layer now gets one wall. 455 printed rope-like round its dots with three walls; 420, which has no holes, printed a fused disc on the same plate. A one-wall 455 plate is sliced and waits for printing. Do not print `2026-10-12-eggshell-02`: it was sliced with three walls.
+- **Status**: Back on the Textured PEI Plate: the operator finds its faces nicer. The generator prints with the settings of the accepted 2026-10-04 plate again; `2026-10-12-eggshell-03` (32 caps) is sliced and waits for printing.
 
 ---
 
@@ -131,7 +131,23 @@ alone (`plate_2026-10-12-eggshell-eng-onewall_P1S.gcode.3mf`):
 
 Slice check: PASS, 52 m 9 s, Engineering Plate, `M190 S70`, no
 `G29.1 Z-0.04`, `wall_loops` 3 from layer 2. `test_bambu_project.py`: 24
-passed; `test_cap_batch.py`: 20 passed.
+passed; `test_cap_batch.py`: 20 passed. Not printed.
+
+### Back to the Textured PEI Plate
+
+The operator compared the faces and finds the Textured PEI Plate's nicer
+(2026-10-12); cap plates print on it again. `bambu_project.py` is back to
+`Textured PEI Plate` and three walls on the first layer.
+
+`2026-10-12-eggshell-03`: all 36 caps of `2026-09-29-eggshell-01` less the
+four done (39, 190, 265, 370). 455 and 420 are on it: they printed on the
+Engineering Plate only. Slice check: PASS, 32 objects, 5 h 36 m 2 s, slots
+used 1-4, AMS loads 1-4, `G29.1 Z-0.04 ; for Textured PEI Plate` present;
+filament 43.03 / 10.18 / 12.16 / 12.01 g in slots 1-4. Its
+`project_settings.config` matches the accepted 2026-10-04 plate's key for
+key. `test_bambu_project.py`: 23 passed; `test_cap_batch.py`: 20 passed.
+The unprinted `2026-10-12-eggshell-02` and `-eng-onewall` plates were
+deleted.
 
 ## Technical Interpretation
 
@@ -155,26 +171,23 @@ passed; `test_cap_batch.py`: 20 passed.
   lines, the structure that fused on 420. The hairline gaps across 420's
   middle show that even straight lines have little margin at nominal
   height; left alone here, one change at a time.
+- On the Textured PEI Plate both covers come back: the 0.04 mm lowering
+  fuses the short loops, and the texture, not a glue film, sets the face
+  finish.
 
 ## Key Decisions
 
-1. `bambu_project.PRINT_SETTINGS["curr_bed_type"]` is `Engineering Plate`;
-   the plate temperature comes from PETG Basic's `eng_plate_temp`.
-2. The published `out/hen_tag_revC_P1S.3mf` and the part checks in
-   `slice_check.py` stay on the Textured PEI Plate: it is the public
-   download, and an Engineering Plate needs glue.
-3. `only_one_wall_first_layer` is 1: the face gets one wall; the body keeps
-   three walls from layer 2.
+1. Cap plates print on the Textured PEI Plate (operator, 2026-10-12):
+   `bambu_project.PRINT_SETTINGS["curr_bed_type"]` is back to
+   `Textured PEI Plate`. The Engineering Plate switch is undone.
+2. `only_one_wall_first_layer` stays at Bambu's 0: one wall was never
+   printed on the Textured PEI Plate, and the accepted plate had three.
+3. The published `out/hen_tag_revC_P1S.3mf` and the part checks in
+   `slice_check.py` never left the Textured PEI Plate.
 
 ## Open Questions & Verification Items
 
-1. Print `2026-10-12-eggshell-eng-onewall` (455 alone, 52 m), glue stick,
-   otherwise unchanged. Fused beige round the dots confirms the fix; then
-   regenerate `2026-10-12-eggshell-02` with it, less 455.
-2. Accept or reject 420 (hairline gaps, blob); accepted, it leaves
-   `2026-10-12-eggshell-02`.
-3. If straight lines still show hairline gaps on the one-wall 455, the next
-   single change is the first-layer flow or liquid glue, which Bambu says
-   gives a more even first layer. All three prints so far used a glue stick.
-4. Watch whether the beige blob at the disc edge comes back.
-5. Print `2026-10-12-eggshell-02` only after item 1 passes.
+1. Print `2026-10-12-eggshell-03` on the Textured PEI Plate.
+2. If a motif prints rope-like on the Textured PEI Plate too, one wall on
+   the first layer (above) is the measured option.
+3. The beige blob on 420's disc edge: watch whether it comes back.

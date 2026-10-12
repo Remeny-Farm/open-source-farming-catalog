@@ -59,19 +59,16 @@ BAMBU_APPLICATION = "BambuStudio-02.08.02.60"
 PRINT_SETTINGS = {
     # the bayonet (DESIGN.md)
     "wall_loops": "3", "wall_generator": "arachne", "reduce_crossing_wall": "1",
-    # The farm prints cap plates on the smooth Engineering Plate, glued as
-    # Bambu requires; the P1S start G-code's -0.04 mm Z for the Textured PEI
-    # Plate drops out (docs/lab/2026-10-12-cap-plate-engineering-plate.md).
-    "curr_bed_type": "Engineering Plate",
-    # The design face is the first layer and prints against the bed
-    # (docs/lab/2026-10-04-cap-face-first-layer.md).
+    # Textured PEI: the P1S start G-code lowers the nozzle 0.04 mm for it,
+    # which fuses the face's short wall loops, and the texture gives an even
+    # matte face. The smooth Engineering Plate printed them rope-like
+    # (docs/lab/2026-10-12-cap-plate-engineering-plate.md).
+    "curr_bed_type": "Textured PEI Plate",
+    # The design face is the first layer and prints against the textured
+    # plate (docs/lab/2026-10-04-cap-face-first-layer.md).
     "initial_layer_print_height": "0.2",    # pinned; the GUI print ran 0.12
     "initial_layer_line_width": "0.5",      # pinned
     "initial_layer_flow_ratio": "1.05",     # PETG Basic's 0.95 back to 1.0 on the face
-    # One wall on the face: three walls round every motif hole leave short
-    # loops that need the textured plate's extra squish to fuse; on the
-    # Engineering Plate they print rope-like (2026-10-12 lab note).
-    "only_one_wall_first_layer": "1",
     "initial_layer_speed": "30",
     "initial_layer_infill_speed": "35",
     "bottom_surface_pattern": "monotonic",  # pinned

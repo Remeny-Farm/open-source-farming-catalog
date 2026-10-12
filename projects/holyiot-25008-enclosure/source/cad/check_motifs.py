@@ -11,7 +11,7 @@ Every band pattern (for serial 67 and 12345): inside r 12.2-14.8 and the
 window, same feature and gap rules. --svg writes a contact sheet.
 
 The face rule on top: every motif is an inlay flush with the design face,
-which is the first layer, 0.5 mm lines against the bed. An island or a
+which is the first layer, 0.5 mm lines on the textured plate. An island or a
 gap there needs two lines, cm.FACE_MIN. Motifs drawn to the older 0.8 mm
 rule and not yet redrawn are listed in cm.FACE_PENDING; a listed motif that
 meets the face rule must leave the list.
