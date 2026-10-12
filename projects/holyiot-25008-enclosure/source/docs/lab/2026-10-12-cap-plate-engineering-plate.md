@@ -2,7 +2,7 @@
 
 - **Date**: 2026-10-12
 - **Author**: Hen-Tag Engineering
-- **Status**: Generator switched and verified by slicer (CLI) and the test suite. Engineering Plate test plate not printed yet.
+- **Status**: Generator switched. The one-cap test (455) printed with an under-filled face; an A/B plate (455 + 420) is sliced and waits for printing. Do not print `2026-10-12-eggshell-02`.
 
 ---
 
@@ -65,6 +65,31 @@ Slice check: PASS, 31 objects, 5 h 24 m 54 s, slots used 1-4, AMS loads 1-4,
 Engineering Plate at 70 °C; filament 41.94 / 9.92 / 12.13 / 11.21 g in
 slots 1-4.
 
+### The 455 test print (operator photos, 2026-10-12)
+
+Printed from `plate_2026-10-12-eggshell-eng-test_P1S.gcode.3mf` on the
+Engineering Plate with a glue stick, bed levelling on, dried filament
+(operator).
+
+| Observation | Where |
+|---|---|
+| Beige lines round, apart and rope-like, with gaps between them | disc and upper band, around the brown dots |
+| Straighter, smoother lines, gaps still visible | the lower band, which has no dots |
+| Solid, smooth glyphs | the white number |
+| Glittery, bubbly surface | inside the brown dots |
+
+First layer from the G-code, against the accepted 2026-10-04 plate:
+
+| | 2026-10-04 (Textured PEI) | 455 (Engineering Plate) |
+|---|---|---|
+| Layer, line width, flow | 0.2 mm, 0.5 mm, 1.05 | the same |
+| Deposited section, all features | 0.082-0.112 mm3/mm | 0.076-0.112 mm3/mm |
+| Bottom surface of the beige (straight G1 moves) | 96 mm | 93 mm |
+| Retractions of the busiest filament on layer 1 | 251 for four caps (brown) | 159 for one cap (beige) |
+
+The 0.2 x 0.5 mm line at this flow deposits 0.091 mm3/mm, exactly one
+0.2 mm layer at 0.457 mm spacing: no margin for a gap larger than 0.2 mm.
+
 ## Technical Interpretation
 
 - The P1S start G-code lowers the nozzle 0.04 mm only on the Textured PEI
@@ -73,6 +98,15 @@ slots 1-4.
   PETG Basic's 0.95.
 - The design face prints against the glue, so the glue film, not a texture,
   now sets the face finish.
+- 455's face is not under-extruded by the slicer: settings and deposited
+  volume match the accepted plate. Two causes remain, not yet separated:
+  (a) the first layer has no margin on a smooth plate, and a glue-stick
+  film or a probe offset leaves the nozzle above 0.2 mm; the Textured PEI
+  plate's 0.04 mm lowering and its texture hid that before; (b) 455's 31
+  dot holes turn the beige into short variable-width wall loops with 159
+  retractions, and PETG starts each loop short. The smoother dot-free band
+  points at (b) adding to (a); the solid white number argues against (a)
+  alone.
 
 ## Key Decisions
 
@@ -84,9 +118,11 @@ slots 1-4.
 
 ## Open Questions & Verification Items
 
-1. Print `2026-10-12-eggshell-eng-test` from its `.gcode.3mf` on a glued
-   Engineering Plate and compare with the Textured PEI caps: face fill,
-   the `dots` centre and band, the edge chamfer, release from the plate.
+1. Done for 455, under-filled (above). Print `2026-10-12-eggshell-eng-ab`
+   (455 at 1A, 420 at 2A; 1 h 03 m) unchanged, glue stick again: 420's
+   disc is the same beige with no holes. Rope-like beige on 420 too means
+   (a), a first-layer margin; a smooth 420 disc means (b), the first-layer
+   wall structure. 420 then leaves `2026-10-12-eggshell-02`.
 2. Record which glue was used (stick or liquid); Bambu notes liquid glue
    gives a more even first layer.
 3. Print `2026-10-12-eggshell-02` only after item 1 passes.
