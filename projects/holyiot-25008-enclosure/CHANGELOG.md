@@ -15,6 +15,7 @@ Dates follow the lab notes and commits in `source/`.
 - 2026-10-12: the four-cap test plate of 2026-10-04 accepted; cap plates are now sliced for the Engineering Plate (glued, 70 °C) instead of the Textured PEI Plate (`source/docs/lab/2026-10-12-cap-plate-engineering-plate.md`).
 - 2026-10-12: the cap face's first layer gets one wall; three walls round every motif hole printed rope-like on the Engineering Plate (same lab note).
 - 2026-10-12: cap plates back on the Textured PEI Plate with the settings of the accepted 2026-10-04 plate; the operator finds its faces nicer (same lab note).
+- 2026-10-12: a body printed with the turned lugs puts a test cap's number at 6 o'clock (`source/docs/lab/2026-10-09-cap-rest-angle.md`).
 
 ## rev-b (2026-08-30)
 
