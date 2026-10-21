@@ -33,6 +33,10 @@ function makeVp8x(w: number, h: number): Buffer {
 const latchBytes = Buffer.from('solid latch\nendsolid latch\n');
 const latchSha = createHash('sha256').update(latchBytes).digest('hex');
 
+function sidecar(): string {
+  return `${JSON.stringify({ provenance: 'Photo supplied by Tester, 2026-10-21; cropped 4:3 and re-encoded, metadata stripped.', createdAt: '2026-10-21T00:00:00.000Z' })}\n`;
+}
+
 function baseProject(overrides: Record<string, unknown> = {}) {
   return {
     schemaVersion: 2,
@@ -149,6 +153,7 @@ test('validateCatalog checks photo suffix, missing file, and dimensions', () => 
 
   await mkdir(join(dir, 'photos'), { recursive: true });
   await writeFile(join(dir, 'photos', 'latch-1200.webp'), makeVp8(1000, 900));
+  await writeFile(join(dir, 'photos', 'latch-1200.webp.json'), sidecar());
   res = await validateCatalog(root);
   assert.ok(res.errors.some(e => e.includes('project.json says')));
 }));
@@ -159,6 +164,7 @@ test('validateCatalog checks thumbnail sibling existence and half dimensions', (
   }));
   await mkdir(join(dir, 'photos'), { recursive: true });
   await writeFile(join(dir, 'photos', 'latch-1200.webp'), makeVp8(1200, 900));
+  await writeFile(join(dir, 'photos', 'latch-1200.webp.json'), sidecar());
   let res = await validateCatalog(root);
   assert.ok(res.errors.some(e => e.includes('photos/latch-600.webp is missing')));
 
@@ -167,6 +173,30 @@ test('validateCatalog checks thumbnail sibling existence and half dimensions', (
   assert.ok(res.errors.some(e => e.includes('expected half of')));
 
   await writeFile(join(dir, 'photos', 'latch-600.webp'), makeVp8(600, 450));
+  await writeFile(join(dir, 'photos', 'latch-600.webp.json'), sidecar());
+  res = await validateCatalog(root);
+  assert.equal(res.errors.length, 0);
+}));
+
+test('validateCatalog requires provenance sidecars next to photo and thumbnail', () => withCatalog(async root => {
+  const dir = await setupProject(root, 'sample-latch', baseProject({
+    photo: { src: 'photos/latch-1200.webp', width: 1200, height: 900, alt: { hu: 'A', en: 'A' } },
+  }));
+  await mkdir(join(dir, 'photos'), { recursive: true });
+  await writeFile(join(dir, 'photos', 'latch-1200.webp'), makeVp8(1200, 900));
+  await writeFile(join(dir, 'photos', 'latch-600.webp'), makeVp8(600, 450));
+  let res = await validateCatalog(root);
+  assert.ok(res.errors.some(e => e.includes('photos/latch-1200.webp.json is missing')));
+  assert.ok(res.errors.some(e => e.includes('photos/latch-600.webp.json is missing')));
+
+  await writeFile(join(dir, 'photos', 'latch-1200.webp.json'), JSON.stringify({ createdAt: '2026-10-21T00:00:00.000Z' }));
+  await writeFile(join(dir, 'photos', 'latch-600.webp.json'), 'not json');
+  res = await validateCatalog(root);
+  assert.ok(res.errors.some(e => e.includes('photos/latch-1200.webp.json must contain a non-empty "provenance" string')));
+  assert.ok(res.errors.some(e => e.includes('photos/latch-600.webp.json is not valid JSON')));
+
+  await writeFile(join(dir, 'photos', 'latch-1200.webp.json'), sidecar());
+  await writeFile(join(dir, 'photos', 'latch-600.webp.json'), sidecar());
   res = await validateCatalog(root);
   assert.equal(res.errors.length, 0);
 }));
@@ -194,15 +224,30 @@ test('validateCatalog validates bom.csv header, columns, and required fields', (
   let res = await validateCatalog(root);
   assert.ok(res.errors.some(e => e.includes('header must be')));
 
-  await writeFile(join(dir, 'bom.csv'), `${bomHeader}\nr1,1,hu,en,src\n`);
+  await writeFile(join(dir, 'bom.csv'), `${bomHeader}\nr1,1,hu,en,export/latch.stl\n`);
   res = await validateCatalog(root);
   assert.ok(res.errors.some(e => e.includes('columns, expected 6')));
 
-  await writeFile(join(dir, 'bom.csv'), `${bomHeader}\n,1,hu,en,src,note\n`);
+  await writeFile(join(dir, 'bom.csv'), `${bomHeader}\n,1,hu,en,export/latch.stl,note\n`);
   res = await validateCatalog(root);
   assert.ok(res.errors.some(e => e.includes('ref, qty, item_hu and item_en are required')));
 
-  await writeFile(join(dir, 'bom.csv'), `${bomHeader}\nr1,1,hu,en,src,note\n`);
+  await writeFile(join(dir, 'bom.csv'), `${bomHeader}\nr1,1,hu,en,export/latch.stl,note\n`);
+  res = await validateCatalog(root);
+  assert.equal(res.errors.length, 0);
+}));
+
+test('validateCatalog checks bom.csv source paths', () => withCatalog(async root => {
+  const dir = await setupProject(root);
+  await writeFile(join(dir, 'bom.csv'), `${bomHeader}\nr1,1,hu,en,export/missing.stl,note\n`);
+  let res = await validateCatalog(root);
+  assert.ok(res.errors.some(e => e.includes('source "export/missing.stl" does not exist inside projects/<id>/')));
+
+  await writeFile(join(dir, 'bom.csv'), `${bomHeader}\nr1,1,hu,en,../../etc/passwd,note\n`);
+  res = await validateCatalog(root);
+  assert.ok(res.errors.some(e => e.includes('must not contain ".."')));
+
+  await writeFile(join(dir, 'bom.csv'), `${bomHeader}\nr1,1,hu,en,https://example.com/part,note\n`);
   res = await validateCatalog(root);
   assert.equal(res.errors.length, 0);
 }));
