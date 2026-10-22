@@ -35,7 +35,7 @@ projects/<id>/
   project.json         required
   README.hu.md         required from stage "built"
   README.en.md         required from stage "built"
-  bom.csv              optional; header exactly: ref,qty,item_hu,item_en,source,notes
+  bom.csv              optional; header exactly: ref,qty,item_hu,item_en,source,notes; a source that is not empty and not an https:// URL must be a relative path with no ".." pointing at an existing file or directory inside projects/<id>/
   CHANGELOG.md         optional
   source/              the project's own tree (any layout); list served files in project.json
   export/              derived files for projects without a source tree
