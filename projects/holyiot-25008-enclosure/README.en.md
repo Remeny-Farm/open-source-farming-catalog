@@ -6,7 +6,9 @@ Two-part transparent PETG enclosure for the Holyiot 25008 BLE module (Nordic nRF
 
 - **Revision C.** Geometry generated from parametric [build123d](https://build123d.readthedocs.io/) source, machine-verified and exported as STEP and STL.
 - The revision C fit coupons (body and cap) have been printed once; dimensions were good.
-- The complete sealed assembly, the radial O-ring seal and water resistance are **untested**. Revision A was printed and fitted on a Bambu Lab P1S; its thread later tore in print and was replaced by the bayonet closure (see the 2026-09-10 lab note).
+- The four-cap per-hen test plate of 2026-10-04 was printed and accepted on 2026-10-12, and its caps fitted to bodies (2026-10-12 lab note).
+- A body with the lugs turned 25° was printed on 2026-10-12; a test cap screwed onto it stops with its number at 6 o'clock (2026-10-09 lab note).
+- The complete sealed assembly, the radial O-ring seal, water resistance and the harness tabs under load are **untested**, and no hen has worn one. Revision A was printed and fitted on a Bambu Lab P1S; its thread later tore in print and was replaced by the bayonet closure (see the 2026-09-10 lab note).
 - Modelled assembled mass 9.92 g against a 10 g target; the cell, holder and O-ring masses are still estimates.
 - **No conductive or carbon-fibre filament.** It detunes the 2.4 GHz antenna and can short the exposed coin-cell terminals.
 
@@ -32,6 +34,7 @@ Two-part transparent PETG enclosure for the Holyiot 25008 BLE module (Nordic nRF
 | Per-hen cap generator | `source/cad/cap_marking.py` |
 | Machine checks | `source/cad/verify.py` |
 | Bill of materials | `bom.csv` |
+| Print evidence (dated lab notes) | `source/docs/lab/` |
 
 ## Building it
 
