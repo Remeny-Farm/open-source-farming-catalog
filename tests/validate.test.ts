@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdtemp, rm, mkdir, writeFile } from 'node:fs/promises';
+import { mkdtemp, rm, mkdir, writeFile, symlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { validateCatalog, webpDimensions, parseCsvLine, bomHeader } from '../scripts/lib/validate-catalog.ts';
@@ -201,6 +201,21 @@ test('validateCatalog requires provenance sidecars next to photo and thumbnail',
   assert.equal(res.errors.length, 0);
 }));
 
+test('validateCatalog records a sidecar that is not a JSON object instead of throwing', () => withCatalog(async root => {
+  const dir = await setupProject(root, 'sample-latch', baseProject({
+    photo: { src: 'photos/latch-1200.webp', width: 1200, height: 900, alt: { hu: 'A', en: 'A' } },
+  }));
+  await mkdir(join(dir, 'photos'), { recursive: true });
+  await writeFile(join(dir, 'photos', 'latch-1200.webp'), makeVp8(1200, 900));
+  await writeFile(join(dir, 'photos', 'latch-600.webp'), makeVp8(600, 450));
+  await writeFile(join(dir, 'photos', 'latch-1200.webp.json'), 'null');
+  await writeFile(join(dir, 'photos', 'latch-600.webp.json'), '["provenance"]');
+  const res = await validateCatalog(root);
+  assert.ok(res.errors.some(e => e.includes('photos/latch-1200.webp.json must be a JSON object')));
+  assert.ok(res.errors.some(e => e.includes('photos/latch-600.webp.json must be a JSON object')));
+  assert.equal(res.projects.length, 1);
+}));
+
 test('validateCatalog requires hu and en READMEs for built stage', () => withCatalog(async root => {
   const dir = await setupProject(root, 'sample-latch', baseProject({ stage: 'built' }));
   let res = await validateCatalog(root);
@@ -250,6 +265,22 @@ test('validateCatalog checks bom.csv source paths', () => withCatalog(async root
   await writeFile(join(dir, 'bom.csv'), `${bomHeader}\nr1,1,hu,en,https://example.com/part,note\n`);
   res = await validateCatalog(root);
   assert.equal(res.errors.length, 0);
+}));
+
+test('validateCatalog rejects a bom.csv source that a symlink resolves outside the project', () => withCatalog(async root => {
+  const dir = await setupProject(root);
+  await mkdir(join(root, 'outside'), { recursive: true });
+  await writeFile(join(root, 'outside', 'README.en.md'), 'Elsewhere');
+  await symlink(join('..', '..', 'outside'), join(dir, 'linked'));
+  await symlink('export', join(dir, 'alias'));
+  await writeFile(join(dir, 'bom.csv'), `${bomHeader}\nr1,1,hu,en,linked/README.en.md,note\nr2,1,hu,en,linked,note\n`);
+  let res = await validateCatalog(root);
+  assert.ok(res.errors.some(e => e.includes('row 2: source "linked/README.en.md" resolves outside projects/<id>/')));
+  assert.ok(res.errors.some(e => e.includes('row 3: source "linked" resolves outside projects/<id>/')));
+
+  await writeFile(join(dir, 'bom.csv'), `${bomHeader}\nr1,1,hu,en,alias/latch.stl,note\nr2,1,hu,en,linked/missing.md,note\n`);
+  res = await validateCatalog(root);
+  assert.deepEqual(res.errors, ['sample-latch: bom.csv row 3: source "linked/missing.md" does not exist inside projects/<id>/']);
 }));
 
 test('validateCatalog validates build reports filename, schema, and date match', () => withCatalog(async root => {

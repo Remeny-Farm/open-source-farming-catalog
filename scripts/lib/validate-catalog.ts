@@ -2,8 +2,8 @@
 // hashes, photo files and dimensions, required READMEs, BOM shape and build reports.
 // Erasable TypeScript only (Node runs this file with type stripping).
 import { createHash } from 'node:crypto';
-import { readdir, readFile, stat } from 'node:fs/promises';
-import { join } from 'node:path';
+import { readdir, readFile, realpath, stat } from 'node:fs/promises';
+import { join, sep } from 'node:path';
 import { projectSchema, maxFileBytes, type Photo, type Project } from '../../schema/project.ts';
 import { buildSchema, buildFilePattern } from '../../schema/build.ts';
 
@@ -89,6 +89,7 @@ async function checkSidecar(base: string, label: string, src: string, fail: Fail
   let parsed: unknown;
   try { parsed = JSON.parse(raw); }
   catch (error) { fail(`${label}: ${sidecar} is not valid JSON: ${(error as Error).message}`); return; }
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) { fail(`${label}: ${sidecar} must be a JSON object`); return; }
   const provenance = (parsed as { provenance?: unknown }).provenance;
   if (typeof provenance !== 'string' || !provenance.trim()) fail(`${label}: ${sidecar} must contain a non-empty "provenance" string`);
 }
@@ -148,13 +149,17 @@ async function checkBom(base: string, fail: Fail): Promise<void> {
 }
 
 // A non-empty source is either an https:// URL or a relative path to a file or directory inside projects/<id>/.
+// Containment is checked on the resolved real path, so a symlink cannot point the source outside the project.
 async function checkBomSource(base: string, row: number, source: string, fail: Fail): Promise<void> {
   const value = source.trim();
   if (!value || value.startsWith('https://')) return;
   if (value.startsWith('/')) { fail(`bom.csv row ${row}: source "${value}" must be a path relative to projects/<id>/`); return; }
   if (value.split('/').includes('..')) { fail(`bom.csv row ${row}: source "${value}" must not contain ".."`); return; }
-  try { await stat(join(base, value)); }
-  catch { fail(`bom.csv row ${row}: source "${value}" does not exist inside projects/<id>/`); }
+  let target: string;
+  try { target = await realpath(join(base, value)); }
+  catch { fail(`bom.csv row ${row}: source "${value}" does not exist inside projects/<id>/`); return; }
+  const realBase = await realpath(base);
+  if (target !== realBase && !target.startsWith(realBase + sep)) fail(`bom.csv row ${row}: source "${value}" resolves outside projects/<id>/`);
 }
 
 async function checkBuilds(base: string, fail: Fail): Promise<void> {
