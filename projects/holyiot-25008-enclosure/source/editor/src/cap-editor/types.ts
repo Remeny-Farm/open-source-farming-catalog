@@ -36,7 +36,7 @@ export type CatalogEntry = { id: string; name: { hu: string; en: string }; pack?
 
 export type WalletView = { balance: bigint };
 
-export type ClientErrorCode = 'INSUFFICIENT_GRAIN' | 'DESIGN_BATCHED' | 'CATALOG_MISMATCH' | 'NOT_EDITABLE';
+export type ClientErrorCode = 'INSUFFICIENT_GRAIN' | 'DESIGN_BATCHED' | 'CATALOG_MISMATCH' | 'SCHEME_RETIRED' | 'NOT_EDITABLE';
 export type ClientError = { code: ClientErrorCode };
 
 // The only seam between the editor and chirp: the prototype ships an
@@ -98,6 +98,8 @@ export type CapEditorCopy = {
   summaryLabel: string;
   loading: string;
   continueLabel: string;
+  // Badge on a retired scheme shown only because the design already carries it.
+  retiredBadge: string;
 };
 
 export function isClientError(e: unknown): e is ClientError {
@@ -117,6 +119,13 @@ export function pairedZone(catalog: Catalog, zone: ZoneId): ZoneId | null {
 
 export function findEntry(list: readonly CatalogEntry[], id: string | null): CatalogEntry | null {
   return id === null ? null : (list.find((e) => e.id === id) ?? null);
+}
+
+// A retired scheme is no longer offered for a new design (cad/cap_design.py):
+// caps already locked on it are still printed, but it cannot be saved again.
+export function isRetiredScheme(catalog: Catalog, id: string): boolean {
+  const s = catalog.schemes.find((x) => x.id === id);
+  return s !== undefined && 'retired' in s && s.retired === true;
 }
 
 // Golden Grain charged at lock: scheme + icon + centre pattern + band.

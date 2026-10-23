@@ -16,7 +16,7 @@ import proofSample from './assets/proof-sample.svg?inline';
 // hen from the route and the copy from useLocale().
 const dc = defaultColours(catalog);
 const HENS: CapDesign[] = [
-  { henId: 'h67', serial: 67, scheme: 'pasture', icon: 'heart', centre: null, band: null, colours: dc, status: 'draft', designHash: '', proofUrl: null },
+  { henId: 'h67', serial: 67, scheme: 'eggshell', icon: 'heart', centre: null, band: null, colours: dc, status: 'draft', designHash: '', proofUrl: null },
   { henId: 'h8', serial: 8, scheme: 'bluedye', icon: null, centre: 'rings', band: 'dots', colours: { ring: 'a', number: 'base', disc: 'b', centre: 'a', band: 'b' }, status: 'locked', designHash: 'd6d6ead0fc97b830', proofUrl: null },
   { henId: 'h12345', serial: 12345, scheme: 'gold', icon: 'skull', centre: null, band: 'barcode', colours: dc, status: 'installed', designHash: '', proofUrl: proofSample },
 ];
