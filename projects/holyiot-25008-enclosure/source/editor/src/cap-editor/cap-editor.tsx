@@ -14,6 +14,7 @@ import {
   COLOUR_ROLES,
   findEntry,
   isClientError,
+  isRetiredScheme,
   lockPrice,
   pairedZone,
   type CapDesign,
@@ -161,10 +162,14 @@ export function CapEditor({ henId, client, catalog, layout, copy, walletCopy, lo
   const packOf = (id: string | undefined) => catalog.packs.find((p) => p.id === (id ?? 'basic'));
   const badgeOf = (e: CatalogEntry): ReactNode => (e.price_grain === 0 ? null : <Price amount={priceOf(e)} locale={locale} />);
 
-  const schemeCards: SchemeCard[] = catalog.schemes.map((s) => ({
+  // Only the schemes still offered, plus a retired one the design already
+  // carries, shown disabled so a paid cap keeps showing what it is.
+  const schemeCards: SchemeCard[] = catalog.schemes.filter((s) => !isRetiredScheme(catalog, s.id) || s.id === design?.scheme).map((s) => ({
     id: s.id,
     title: s.name[lang],
     blurb: copy.schemeBlurbs[s.id],
+    disabled: isRetiredScheme(catalog, s.id),
+    badge: isRetiredScheme(catalog, s.id) ? copy.retiredBadge : undefined,
     price: <Price amount={BigInt(s.price_grain)} locale={locale} free={copy.free} />,
     swatch: [s.base.hex, s.a.hex, s.b.hex],
   }));
