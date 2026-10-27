@@ -49,7 +49,7 @@ body:
     id: stage
     attributes:
       label: Stage / Állapot
-      description: concept = not built; prototype = built once, not in use; built = works, in use by you; field-tested = in real use, reported. / concept = nem épült meg; prototype = egyszer megépült; built = működik, használod; field-tested = valódi használatban.
+      description: concept = not built; prototype = built once, not in use; built = works, in use by you; field-tested = in real use, reported. / concept = nem épült meg; prototype = egyszer megépült, nincs használatban; built = működik, használod; field-tested = valódi használatban, dokumentáltan.
       options: [concept, prototype, built, field-tested]
     validations:
       required: true
@@ -57,14 +57,14 @@ body:
     id: version
     attributes:
       label: Version / Verzió
-      placeholder: "1.0.0, rev-a or a date such as 2026-10-01"
+      placeholder: "1.0.0, rev-a or a date such as 2026-10-01 / 1.0.0, rev-a vagy dátum, például 2026-10-01"
     validations:
       required: true
   - type: textarea
     id: files
     attributes:
       label: Files / Fájlok
-      description: Where are the files? Links (Printables, your repository) or say "attached below" and drag them into this field (zip if needed, under 20 MB each). / Hol vannak a fájlok? Linkek, vagy „lent csatolva” és húzd ide őket.
+      description: Where are the files? Links (Printables, your repository) or say "attached below" and drag them into this field (zip if needed, under 20 MB each). / Hol vannak a fájlok? Linkek (Printables, saját repó), vagy „lent csatolva”, és húzd ide őket (szükség esetén zipben, fájlonként 20 MB alatt).
     validations:
       required: true
   - type: dropdown
@@ -86,7 +86,7 @@ body:
     id: photo
     attributes:
       label: Photo of the real object / Fotó a valódi tárgyról
-      description: Drag a photo here (at least 1200 px wide, 4:3 preferred). Required for built and field-tested. / Húzd ide a fotót (legalább 1200 px széles). built és field-tested esetén kötelező.
+      description: Drag a photo here (at least 1200 px wide, 4:3 preferred). Required for built and field-tested. / Húzd ide a fotót (legalább 1200 px széles, lehetőleg 4:3). built és field-tested esetén kötelező.
   - type: input
     id: credit
     attributes:
@@ -97,7 +97,7 @@ body:
     id: json
     attributes:
       label: Machine-readable entry (optional) / Géppel olvasható bejegyzés (opcionális)
-      description: A complete project.json per SUBMITTING.md. Agents and scripts fill this; people can skip it.
+      description: A complete project.json per SUBMITTING.md. Agents and scripts fill this; people can skip it. / Teljes project.json a SUBMITTING.md szerint. Ágensek és scriptek töltik ki; emberek kihagyhatják.
       render: json
   - type: checkboxes
     id: rights

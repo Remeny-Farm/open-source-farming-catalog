@@ -7,7 +7,7 @@ body:
     id: project
     attributes:
       label: Project id / Projektazonosító
-      description: The directory name under projects/, e.g. holyiot-25008-enclosure.
+      description: The directory name under projects/, e.g. holyiot-25008-enclosure. / A projects/ alatti könyvtár neve, például holyiot-25008-enclosure.
     validations:
       required: true
   - type: dropdown

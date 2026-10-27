@@ -1,6 +1,7 @@
 // Project contract, schema version 2. Single source of truth for the catalogue and the
 // platform (which re-exports it); /api/v1/project.schema.json is derived from it.
 // Erasable TypeScript only (Node runs this file with type stripping).
+// INVARIANT: the platform re-exports this file, so keep its public exports and import nothing but 'zod'. See schema/README.md.
 import { z } from 'zod';
 
 export const schemaVersion = 2;
