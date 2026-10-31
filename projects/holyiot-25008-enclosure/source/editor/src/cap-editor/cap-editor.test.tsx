@@ -98,6 +98,17 @@ test('a save that fails with a TypeError (network down) shows the generic error,
   expect(alert).not.toHaveTextContent(en.capEditor.errors.NOT_EDITABLE);
 });
 
+test('a save that fails with an error carrying an unknown string code (ECONNREFUSED) shows the generic error', async () => {
+  setupWithClient({
+    ...createMockClient({ hens: [hen], balance: 1000n, catalog }),
+    save: () => Promise.reject({ code: 'ECONNREFUSED' }),
+  });
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole('radio', { name: 'Gold' }));
+  const alert = await screen.findByRole('alert');
+  expect(alert).toHaveTextContent(en.capEditor.errors.UNKNOWN);
+});
+
 test('a load that fails with a plain Error shows the generic error on the loading screen', async () => {
   setupWithClient({
     ...createMockClient({ hens: [hen], balance: 1000n, catalog }),
