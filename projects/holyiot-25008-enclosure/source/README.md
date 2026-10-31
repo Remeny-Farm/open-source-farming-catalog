@@ -2,7 +2,9 @@
 
 Parametric, 3D-printed enclosure for the Remeny Farm hen tag: a small
 BLE activity tag worn by free-range laying hens under the farm's hen-patron
-program. This repository holds the mechanical design only — the parametric
+program. This tree (`projects/holyiot-25008-enclosure/source/` in the Open
+Source Farming catalogue, imported on 2026-09-26 with full history from the
+archived `Remeny-Farm/hen-tag-enclosure`) holds the mechanical design only — the parametric
 [build123d](https://build123d.readthedocs.io/) CAD source, the verification
 and per-tag cap generators, and the physical evidence gathered from printing
 and fitting it — as real solid-body CAD (STEP as well as STL), not a dead
@@ -15,12 +17,12 @@ ST **LIS2DH12** accelerometer) powered by a **CR2032** coin cell. It is worn
 by the hen on a figure-eight elastic harness through the enclosure's in-plane
 side tabs, assembled and installed by farm staff following the documented
 procedure. The electronics and firmware live in a separate, private
-repository; this repository covers the mechanical enclosure only.
+repository; this tree covers the mechanical enclosure only.
 
-The design is welfare-first: the current (Revision B) model lands at
-**10.92 g assembled**, conductive/carbon-fibre filament is strictly
-prohibited (it detunes the 2.4 GHz antenna and creates an ESD/short hazard
-against the exposed coin-cell terminals), and every geometry decision is
+The design is welfare-first: the current model lands at **9.92 g
+assembled** (about 1.2 g of it, the board parts, holder and O-ring, still
+estimated), conductive/carbon-fibre filament is strictly prohibited (it
+detunes the 2.4 GHz antenna and creates an ESD/short hazard against the exposed coin-cell terminals), and every geometry decision is
 checked against interference, wall thickness and printability before it is
 considered done. See [`docs/requirements.md`](docs/requirements.md) for the
 full material and welfare-adjacent requirements this design has to satisfy.
@@ -54,7 +56,7 @@ scheme's locked caps onto one printer plate. Design and requirements:
 cd cad
 uv run --python 3.12 cap_marking.py 67 --icon sun --band dots     # one cap with a band pattern
 uv run --python 3.12 cap_batch.py fixtures/batch_sample.json       # batch JSON -> plate + manifest + proofs
-cd ../editor && pnpm install && pnpm dev                            # the patron editor prototype
+cd ../editor && pnpm install && CHIRP_DIR=$HOME/code/chirp pnpm dev   # the patron editor prototype; needs a chirp checkout
 ```
 
 - [`cad/catalog.json`](cad/catalog.json) is the source of truth for the
@@ -72,10 +74,15 @@ cd ../editor && pnpm install && pnpm dev                            # the patron
   proof SVG per cap. A 36-cap plate slices to 36 objects in an estimated
   6 h 17 m at 0.16 mm with 20 filament changes
   ([lab note](docs/lab/2026-09-14-cap-batch-plate.md),
-  [slot fix](docs/lab/2026-09-29-cap-plate-filament-slots.md)); **no plate
-  has been printed yet.**
-- [`editor/`](editor/) is the drop-in patron editor built with chirp's own
-  UI package; see its README for how it maps into the chirp repository.
+  [slot fix](docs/lab/2026-09-29-cap-plate-filament-slots.md)). The first
+  production plate printed on 2026-09-29, and its faults are fixed in the
+  generator ([floating caps](docs/lab/2026-09-30-cap-plate-floating-caps.md),
+  [first layer](docs/lab/2026-10-04-cap-face-first-layer.md)); the
+  2026-10-04 four-cap test plate was accepted on 2026-10-12
+  ([lab note](docs/lab/2026-10-12-cap-plate-engineering-plate.md)).
+- [`editor/`](editor/) is the reference prototype of the patron editor,
+  built with chirp's own UI package. The live editor is in chirp; see its
+  README for how the files map.
 
 ## Repository structure
 
@@ -85,7 +92,7 @@ cd ../editor && pnpm install && pnpm dev                            # the patron
 | [`docs/requirements.md`](docs/requirements.md) | Source-of-truth requirements: materials, sealing/ingress target, conformal-coating protocol, form factor. |
 | [`docs/lab/`](docs/lab/) | Dated lab notes: physical measurements, print trials, photo-based findings. |
 | [`cad/`](cad/) | Parametric build123d source, the per-tag cap generator, the batch CLI and plate writer, the verification scripts, and the test suites. |
-| [`editor/`](editor/) | Patron cap-editor prototype (React, chirp UI package), browser-testable, drop-in for chirp. |
+| [`editor/`](editor/) | Patron cap-editor reference prototype (React, chirp UI package), browser-testable; the live editor is in chirp. |
 | [`cad/out/`](cad/out/) | Exported STL/STEP. Stable printables (body, cap, fit coupons) are committed; per-tag and debugging outputs are gitignored — see `cad/out/.gitignore`. |
 | [`platform/`](platform/) | Accessory-platform **proposal**: keeper collar, bayonet interface spec, saddle integration. Not yet built. |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | How to contribute: environment, verification requirements, lab-note style, accessory safety envelope. |
@@ -93,9 +100,9 @@ cd ../editor && pnpm install && pnpm dev                            # the patron
 
 ## Quickstart
 
-Both CAD scripts carry [PEP 723](https://peps.python.org/pep-0723/) inline
-dependencies, so `uv` resolves everything (build123d, bd_warehouse) on first
-run. No virtualenv, nothing installed into the repository.
+Every CAD script carries [PEP 723](https://peps.python.org/pep-0723/) inline
+dependencies, so `uv` resolves everything (build123d) on first run. No
+virtualenv, nothing installed into the repository.
 
 ```sh
 cd cad
@@ -120,8 +127,10 @@ uv run --python 3.12 slice_check.py --project   # -> out/hen_tag_revC_P1S.3mf
 ```
 
 First run downloads the OCCT wheel (~60 MB) and a CPython 3.12 toolchain;
-after that it is cached. `verify.py` exits non-zero on any failed check, so
-it works as a pre-commit or CI gate. See [`cad/README.md`](cad/README.md)
+after that it is cached. `verify.py` exits non-zero on any failed check, but
+no hook or CI job runs it (the catalogue's CI runs only `npm test` and
+`npm run validate`), so run it yourself before a PR: see
+[`CONTRIBUTING.md`](CONTRIBUTING.md). See [`cad/README.md`](cad/README.md)
 for the full command reference, including re-checking a part against the
 real slicer.
 
@@ -155,9 +164,10 @@ Full rationale, tolerances and the slicer verification log are in
   ramps replace a thread whose ridges were thinner than one extrusion; every
   face on both parts prints without support, and the O-ring never crosses the
   lugs. [`DESIGN.md`](DESIGN.md#9-bayonet-not-a-thread)
-- **Three-colour coin cap** — a deterministic per-hen cap with coin-style
-  bent lettering, an accent-ring icon, and a clear shell so the LED needs no
-  aligned window. [`DESIGN.md`](DESIGN.md#8-customer-cap-clear-shell-big-coin-lettering-accent-core)
+- **Coin cap in up to four colours** — a deterministic per-hen cap: the shell
+  in the scheme's base colour, a clear LED ring (r 8.5–11.5) so the LED needs
+  no angular alignment, and patron colours on the ring, number, disc, icon or
+  centre pattern and band. [`DESIGN.md`](DESIGN.md#8-customer-cap-base-shell-clear-led-ring-zone-colours)
 - **Flat underside** — verified at 0.000 mm³ of material below the floor
   plane, so nothing presses on the hen but the harness itself.
   [`DESIGN.md`](DESIGN.md#7-in-plane-side-tabs-for-the-harness)
@@ -177,11 +187,12 @@ a worn device:
   replaced it with a bayonet.
 - **Revision B's body** has also been printed and accepted the board in its
   intended orientation, and revision B sliced clean in Bambu Studio.
-- **Revision C's bayonet** slices clean and its coupon pair has been printed
-  once: dimensions good, lock-up angle not yet reported. The full cap, the
-  complete sealed assembly and the harness tabs under load remain untested —
-  no O-ring has been compressed, no water has touched it, and no elastic has
-  loaded a tab.
+- **The bayonet** slices clean, its coupon pair has printed once (dimensions
+  good), and four per-hen caps printed on 2026-10-04 rest on the channel end
+  walls at 55° and stay on when pulled
+  ([lab note](docs/lab/2026-10-09-cap-rest-angle.md)). The complete sealed
+  assembly and the harness tabs under load remain untested — no O-ring has
+  been compressed, no water has touched it, and no elastic has loaded a tab.
 - **No hen has worn this device.**
 
 See [`DESIGN.md`](DESIGN.md#verified-evidence-vs-working-hypotheses) for the
@@ -191,7 +202,7 @@ next print.
 ## Animal welfare
 
 The tag is worn continuously by a live animal, so mass and fit are treated as
-hard constraints, not just engineering targets. At ~10.9 g assembled the
+hard constraints, not just engineering targets. At ~9.9 g assembled the
 device is a small fraction of a laying hen's typical body mass — well inside
 commonly cited bio-logging guidance of keeping an attached device under
 roughly 3 % of body mass — though `DESIGN.md` is explicit that whether the
@@ -205,7 +216,8 @@ or fit themselves.
 ## Accessory platform
 
 [`platform/`](platform/) is a **design proposal**, not a shipping feature:
-nothing in it has been printed or tested, and the current shipping design
+nothing in it has been printed or tested (the full collar v1 is modelled and
+machine-checked, not printed), and the current shipping design
 (`DESIGN.md`, `cad/hen_tag_enclosure.py`) is untouched by it. It describes a
 keeper collar and quarter-turn bayonet mount for a family of accessories —
 decorative rings, villa-only builds, a mesh saddle — without ever modifying

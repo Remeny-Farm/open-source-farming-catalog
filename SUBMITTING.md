@@ -4,7 +4,7 @@ For scripts, agents and people who prefer precision. Human-oriented guidance is 
 
 ## Channels
 
-1. **Pull request** (preferred): add or edit `projects/<id>/` and open a PR against `main`. CI runs `npm run validate`; the maintainer reviews and merges.
+1. **Pull request** (preferred): add or edit `projects/<id>/` and open a PR against `main`. CI runs `npm test` and `npm run validate`; the maintainer reviews and merges.
 2. **Issue with a JSON block**: open a [new design issue](https://github.com/Remeny-Farm/open-source-farming-catalog/issues/new?template=new-design.yml) and paste a complete `project.json` in the "Machine-readable entry" field. The maintainer turns it into a PR.
 
 Both require a GitHub account. Nothing else is accepted.
@@ -17,16 +17,17 @@ Both require a GitHub account. Nothing else is accepted.
 - `title`, `description`, `limitations`, `photo.alt`: objects with non-empty `hu` and `en`.
 - `category`: `mechanical | electronics | firmware | mixed`.
 - `stage`: `concept | prototype | built | field-tested`. From `built` upwards `README.hu.md` and `README.en.md` are required.
+- `version`: required non-empty string, for example `0.1.0`, `rev-c` or `2026-09-23`. Build reports cite it as `projectVersion`; a release tag `<id>/<version>` must match it.
 - `topics` (at least one): `poultry | livestock | water | fencing | soil | tools | sensors | energy | storage`.
 - `requires` (at least one): `3d-printer | soldering | welding | woodworking | microcontroller-flashing | none`.
 - `licenses` (at least one): `{ "identifier": "<SPDX id>", "path"?: "<file or directory>" }`. No `path` means the whole project.
-- `files` (optional, at least one if present): `{ "path", "sha256", "role" }` with `role` in `source | export | documentation | bom | evidence`. Paths are relative to `projects/<id>/`, must exist, must hash to `sha256`, and must be at most 20 971 520 bytes. Only listed files are served by the website.
+- `files` (optional, at least one if present): `{ "path", "sha256", "role" }` with `role` in `source | export | documentation | bom | evidence`. Paths are relative to `projects/<id>/`, must exist, must hash to `sha256`, and must be at most 20 971 520 bytes. Paths use only `a-z A-Z 0-9 _ . / -` (no spaces), with no leading `/` and no `..` segment. The website serves the listed files plus everything in `photos/` except `photos/originals/` (git-ignored; keep camera originals there).
 - `links` (optional): `{ "kind": "printables | repository | discussion | mirror | video", "url": "https://..." }`.
 - Either `files` or `links` is required.
-- `photo` (optional but required in practice for `built` and `field-tested`): `{ "src": "photos/<name>-1200.webp", "width": 1200, "height": 900, "alt": {hu,en} }`. A `photos/<name>-600.webp` at exactly half size must exist next to it. Generate both with `npm run photo -- <id> <original> --by "<Name>"`.
+- `photo` (optional but required in practice for `built` and `field-tested`): `{ "src": "photos/<name>-1200.webp", "width": 1200, "height": 900, "alt": {hu,en} }`. A `photos/<name>-600.webp` at exactly half size must exist next to it. Generate both with `npm run photo -- <id> <original> --by "<Name>" [--name <basename>] [--date YYYY-MM-DD]`: it writes `photos/<basename>-1200.webp` (1200×900), `photos/<basename>-600.webp` (600×450) and a `<file>.json` sidecar with a non-empty `provenance` string next to each. `<basename>` defaults to `<id>` and existing files are overwritten, so pass `--name` for gallery and build-report photos (for example `--name 2026-10-01-your-handle`). Keep the camera original in `photos/originals/` (git-ignored, never published).
 - `gallery` (optional): array of the same photo objects.
 - `derivedFrom` (optional): `[{ "id"?: "<catalogue id>", "url"?: "https://...", "note"?: {hu,en} }]`, each with `id` or `url`.
-- `maintainers` (at least one) and `contributors` (optional): `{ "name", "url"? , "role"? }`.
+- `maintainers` (at least one): `{ "name", "url"? }`. `contributors` (optional, at least one if present): `{ "name", "url"?, "role"? }`. Every `url` is `https://`.
 
 ## Directory layout
 
@@ -75,14 +76,15 @@ Replace `files` with `"links": [{ "kind": "printables", "url": "https://www.prin
 
 ```sh
 npm ci
+npm test
 npm run validate
 ```
 
-The same command runs in CI on every pull request, without secrets.
+CI runs the same three commands (job `validate`, required on `main`) on every pull request and every push to `main`, without secrets. `npm test` also checks that the Holyiot editor's data copies match `source/cad/catalog.json` and `source/cad/out/layout.json`; fix a mismatch with `pnpm sync:data` in `projects/holyiot-25008-enclosure/source/editor`.
 
 ## Build reports
 
-`projects/<id>/builds/<yyyy-mm-dd>-<slug>.json`:
+`projects/<id>/builds/<yyyy-mm-dd>-<slug>.json` (`<slug>` in lowercase kebab-case), for example:
 
 ```json
 {
@@ -95,6 +97,8 @@ The same command runs in CI on every pull request, without secrets.
              "alt": { "hu": "...", "en": "..." } }
 }
 ```
+
+Rules ([`schema/build.ts`](schema/build.ts)): `schemaVersion` is `1`; `date` equals the date in the file name; `builder` is `{ "name", "url"? }` with an `https://` URL; `projectVersion` (optional) is the project's `version` at build time; `notes` needs `hu` or `en` (the reviewer may add the other); unknown keys are rejected. A `photo` follows the project photo rules: `-1200.webp` with a half-size `-600.webp` and a sidecar for each (`npm run photo -- <id> <original> --by "<Name>" --name <yyyy-mm-dd>-<slug>`).
 
 ## Review criteria
 

@@ -2,7 +2,7 @@
 
 ## Purpose & Status
 
-Design for making the existing Rev B tag the mounting platform for a family of
+Design for making the current tag (bayonet closure) the mounting platform for a family of
 accessories (decorative add-ons, villa builds, saddle integration) **without
 changing anything the current tag already does**: LED ring window, coin
 lettering, radial seal, bayonet cap, flat underside, harness tabs, mass budget.
@@ -59,20 +59,21 @@ Machine-verified on 2026-08-30: the variant removes 30.1 mm³, adds 0.0 mm³ —
 closure, seal band, cavity, tabs, flat underside untouched; the collar coupon
 shows 0.000 mm³ interference against both the grooved body and the cap, and
 its lowest point stays 0.40 mm above the floor plane (it never touches the
-hen). Optional Rev C nicety: 0.3 mm pad-seat recesses on the tab shoulder
-ledges.
+hen). Optional nicety for a future revision (no revision has it yet): 0.3 mm
+pad-seat recesses on the tab shoulder ledges.
 
 ## Frozen interface (contract for every future revision)
 
 Any revision that keeps these values stays collar-compatible. Values from
-`hen_tag_enclosure.py` (Rev B, unchanged by the Rev C bayonet closure):
+`hen_tag_enclosure.py` (the current bayonet tag; the platform was re-checked
+against it on 2026-09-10):
 
 | Parameter | Value | Why frozen |
 |---|---|---|
 | Cap skirt OD (`2*r_cap_out`) | 31.94 mm | collar bore, lip radius |
-| Cap face height (assembled) | 8.70 mm | collar crown deck height |
+| Cap face height (assembled) | 8.70 mm above the floor plane (z 7.70) | collar crown deck height |
 | Rim edge zone | r 15.4–15.97 | lip lands here, outside lettering |
-| Lettering band | r 12.5–15.4 | must stay uncovered |
+| Lettering band | r 11.60–15.40 (number); the staff message may reach r 15.60 (`cap_marking.py` `TOP_R_MAX`) | must stay uncovered |
 | Clear LED ring | r 8.5–11.5 | optical keep-out for accessories |
 | Grip scallops | 8 × 45°, R1.4 cutter, 0.25 deep | anti-rotation ribs mate these |
 | Tab width (`tab_w`) | 13.00 mm | rotation key windows |
@@ -110,8 +111,9 @@ replace rather than scrub when soiled.
 ## Open questions
 
 - Actual cap break-loose torque (bench, needed for the 3× margin).
-- Whether friction-only cap lock suffices on unmodified Rev B caps, or the
-  Rev C finer scallops are required for the positive lock.
+- Whether friction-only cap lock suffices with the stock 0.25 mm grip
+  scallops, or finer scallops are needed for a positive lock (no revision has
+  them yet).
 - Antenna keep-out: no data; the RF A/B test answers whether the collar wall
   (PETG, ≥2 mm off the body wall) matters at all.
 - Vet sign-off items and certifier notification per the welfare framework.

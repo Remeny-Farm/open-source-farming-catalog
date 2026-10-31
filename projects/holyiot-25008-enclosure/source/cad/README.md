@@ -8,7 +8,7 @@ being a dead triangle mesh.
 
 ## Running
 
-Both scripts carry PEP 723 inline dependencies, so `uv` resolves everything on
+The scripts carry PEP 723 inline dependencies, so `uv` resolves everything on
 first run. No virtualenv, and nothing is installed into the repository.
 
 ```sh
@@ -51,25 +51,25 @@ customer-facing choices, everything else is fixed:
 
 | Input | Envelope |
 |---|---|
-| number | **required**, 1–5 digits, bottom arc, 6.0 pt |
-| `--top` message | ALL CAPS coin lettering at 5.2 pt; letters incl. Hungarian (ő/ű), digits, space, `.:!?'"+-`; **guaranteed-safe length: 8 characters** (all-'W' worst case), typical texts fit ~11–13 — over-length is rejected with the measured span |
-| `--icon` | `heart` / `star` / `flower` / `none` — parametric shapes in the centre |
+| number | **required**, 1–5 digits, bottom arc, 4.5 pt |
+| `--top` message | staff-only; ALL CAPS coin lettering at 3.6 pt; letters incl. Hungarian (ő/ű), digits, space, `.:!?'"+-`; over-length is rejected with the measured span and the guaranteed-safe length |
+| `--icon` / `--centre` / `--band` | ids from `catalog.json`: 34 icons or `none` (default `heart`), 3 centre patterns, 13 band patterns; `--icon` and `--centre` exclude each other |
+| `--colours` / `--scheme` | each zone (`ring`, `number`, `disc`, `centre`, `band`) gets `base`, `a`, `b` or `clear`; the scheme (default `pasture`) sets the filaments |
 | `--font` | curated list: verdana (default), tahoma, arial, futura, din, rounded |
 
-**Layout (second print-driven revision): the whole shell is CLEAR PETG.** The
-first trial printed the lettering at a 2.9 mm band and it was unreadable, and
-the product look wanted a transparent body anyway. With the shell clear, the
-dedicated LED window disappears — the LED shines through wherever it lands, so
-there is nothing to align — and the lettering band grows to ~6 mm: double the
-letter height, at the price of a shorter message. The centre is a full
-**accent disc** (Ø17.2) in the third colour with the icon cut out of it and
-inlaid in the text colour — the two colours meet edge to edge, no clear gap.
+**Layout: a shell in the scheme's base colour with a clear LED ring.** A clear
+annulus (r 8.5–11.5) runs through the whole top plate, so the LED shows
+wherever it lands and nothing has to be aligned. The patron's zone colours cut
+the rest of the top plate into up to four bodies. A zone (outer ring, inner
+disc) runs through the whole plate; the number, centre element and band
+pattern are 0.64 mm flush inlays (`--depth`).
 
 | Slot | Body | Filament |
 |---|---|---|
-| 1 | `cap_<n>` | the whole shell — **clear PETG** |
-| 2 | `marking_<n>` | lettering + icon, text colour (0.64 mm flush inlay) |
-| 3 | `core_<n>` | accent disc, the icon cut from it (0.64 mm flush inlay) |
+| 1 | `cap_<n>` | the shell, scheme base colour |
+| 2 | `window_<n>` | Prusament PETG Clear: the LED ring plus any zone set to `clear` |
+| 3 | `a_<n>` | scheme colour a (zones and inlays) |
+| 4 | `b_<n>` | scheme colour b (zones and inlays) |
 
 Deterministic by design: **font sizes are fixed**, misfits are rejected with
 measured numbers, and identical input produces **byte-identical** output
@@ -82,10 +82,11 @@ accented capitals alone fit), and comma/semicolon/parentheses are excluded
 from the charset for the same below-the-baseline reason.
 
 The deliverable for the P1S is **`out/cap_<n>_P1S.3mf`** — a Bambu Studio
-project with the three bodies as parts of ONE object (`--assemble` via the
+project with the bodies as parts of ONE object (`--assemble` via the
 Bambu CLI, so nothing can be arranged apart or dragged out of register) and
-the filament slots pre-assigned. Open it, load the project settings, put clear
-PETG in AMS slot 1, the text colour in 2, the accent colour in 3, slice. Each
+the filament slots pre-assigned. Open it, load the project settings, load the
+scheme's base filament in AMS slot 1, Prusament PETG Clear in 2, colour a in 3
+and colour b in 4, slice. Each
 part's `extruder` is patched into `Metadata/model_settings.config`, the
 assembler's per-part recentring is undone with measured translations, and the
 result is verified numerically against the source solids plus round-tripped
@@ -93,7 +94,7 @@ through the CLI. Needs `/Applications/BambuStudio.app`; without it only the
 vendor-neutral `cap_<n>.3mf` + per-part STLs are written (assign filaments by
 hand in other slicers).
 
-Because the cap prints top-plate-down, all three bodies meet in the first
+Because the cap prints top-plate-down, all bodies meet in the first
 layers against the plate; the outer face comes out as one smooth plane. There
 is no clear layer over or under the inlays — the first layer is already the
 final colour. A washed-out colour means the coloured PETG itself is
@@ -115,7 +116,9 @@ copied.
 | File | Role |
 |---|---|
 | `hen_tag_enclosure.py` | All geometry. `Params` at the top holds every dimension. |
-| `catalog.json` | Schemes, icons, centre/band patterns and fees a patron may choose; the app ships a copy, `test_cap_marking.py` keeps them identical. |
+| `board_holyiot_25008.py` | Board constants taken from the manufacturer's STEP model (not committed); `verify.py --board-step PATH` re-extracts them and fails on drift. |
+| `hen_tag_platform.py`, `collar_full.py` | Accessory-platform proposal parts (`../platform/`), nothing printed. They import `hen_tag_enclosure.py` and never change it. |
+| `catalog.json` | Source of truth for the schemes, icons, centre/band patterns, zones and fees a patron may choose. `test_cap_marking.py` checks its ids against the generator's `ICONS`, `PATTERNS_CENTRE` and `PATTERNS_BAND`. The editor prototype's copy (`../editor/src/cap-editor/data/catalog.json`, refreshed with `pnpm sync:data`) is kept byte-identical by the catalogue's `tests/editor-data-parity.test.ts` (root `npm test`, in CI). The app ships a verbatim copy, chirp `packages/shared-types/src/i18n/hen-cap-catalog.json` (chirp ADR-0244, "Generator home"): a change here bumps `generator_version` in the same PR and is followed by a chirp PR with the copy. Nothing here checks chirp; `cap_batch.py` only refuses a batch whose `generator_version` differs, at print time. |
 | `cap_design.py` | Catalog loader, `design_hash` (v2, with zone colours), `validate_design` (zone rules incl. no translucent filament on an opaque zone; retired schemes stay valid), `lock_price`; no build123d, shared by the batch CLI and the tests. |
 | `cap_motifs.py` | Every icon and pattern as a parametric sketch (34 icons, 3 centre, 13 band patterns; the barcode band is seeded by the serial). |
 | `check_motifs.py` | Printability of the whole motif library (erosion/dilation, extents, the 1.0 mm face rule with its `FACE_PENDING` list) plus a contact sheet (`--svg`). |
@@ -123,16 +126,21 @@ copied.
 | `bambu_project.py` | Pure-Python Bambu Studio plate writer (6 × 6 grid, part extruders, the farm's `PRINT_SETTINGS`, purge volumes and first-layer colour order from the scheme). |
 | `bambu_template.py` | Regenerates `bambu/project_settings.json` from Bambu Studio's own P1S / 0.16mm Optimal / PETG Basic × 4 profiles. Rerun after a Bambu Studio update. |
 | `cap_batch.py` | Batch JSON → plate, manifest, proofs; caches bodies per design hash; runs `slice_check.py` on the plate, which writes the print-ready `.gcode.3mf`. |
+| `fixtures/batch_sample.json` | The shape of a `hen-cap-batch/1` file. |
 | `test_bambu_project.py`, `test_cap_batch.py` | Writer and batch suites (structure, determinism, refusals, a real slice). |
 | `verify.py` | Interference, fit, bayonet, wall thickness, seal and harness checks. |
 | `slice_check.py` | Real-slicer check: warnings and open-air travel counts per part; `--project` writes the ready-to-print Bambu project. Needs Bambu Studio. |
 | `out/hen_tag_revC_P1S.3mf` | Bambu Studio project: body, cap and both coupons on one P1S plate, print settings baked in. |
-| `cap_marking.py` | Deterministic per-tag cap generator (number, message, icon, font). |
+| `cap_marking.py` | Deterministic per-tag cap generator (number, message, icon or centre pattern, band pattern, zone colours, font). |
 | `test_cap_marking.py` | Generator test suite: envelope, rejections, determinism. |
 | `out/body.stl` / `.step` | Main housing. |
 | `out/cap.stl` / `.step` | Bayonet cap. |
-| `out/coupon_*.stl` | Bayonet + groove fit coupons. Print these first: the bayonet has not been printed anywhere yet. |
+| `overhang.py` | Mesh check for exported STLs (standard library only): reports downward faces steeper than 45° above the bed. Every printable must print support-free in its exported orientation; run it on new or changed parts before handing STLs over. |
+| `out/coupon_*.stl` | Bayonet + groove fit coupons. Print these first on a new printer: the pair has printed once (dimensions good, `../docs/lab/2026-09-10-thread-print-failure.md`), and per-hen caps rest on the end wall (`../docs/lab/2026-10-09-cap-rest-angle.md`). |
 | `out/section_*.stl` | Half sections, for looking at the internals only. |
+
+Import rule: `cap_design.py` imports no build123d (the batch CLI and the tests
+load it fast); the platform modules import the enclosure, never the reverse.
 
 ## Changing dimensions
 
@@ -158,9 +166,10 @@ sweep helper so their bearing faces share a pitch.
 
 ### Batch workflow
 
-1. The app's admin page downloads a `hen-cap-batch/1` JSON: one scheme, up to
-   36 locked caps (serial, icon *or* centre pattern, band pattern, design
-   hash, hen name). `fixtures/batch_sample.json` is the shape.
+1. The app's admin page downloads a `hen-cap-batch/1` JSON: `batch_id`, one
+   scheme, `generator_version`, and up to 36 locked caps (serial, icon *or*
+   centre pattern, band pattern, zone `colours`, design hash, hen name).
+   `fixtures/batch_sample.json` is the shape.
 2. `uv run --python 3.12 cap_batch.py <batch.json>` refuses the whole batch on
    any problem (schema, `generator_version` ≠ `catalog.json`, unknown ids,
    icon + centre together, a zone colour rule, a translucent filament on the
@@ -191,15 +200,24 @@ sweep helper so their bearing faces share a pitch.
    proof in the bottom view.
 4. Upload the proofs to the app (file name = design hash).
 
+The generator lives only in this tree on `main`: never generate a plate from
+the archived Remeny-Farm/hen-tag-enclosure (chirp ADR-0244, "Generator home").
+The `design_hash` v2 test vectors in `test_cap_marking.py` are repeated in
+chirp `packages/shared-types/src/hen-cap.test.ts`: change both or neither.
+Cap plates keep 0.16 mm layers on a 0.2 mm first layer; variable layer height
+was decided against for the face on 2026-10-04 (`../DESIGN.md`, Print
+Settings). No body-plate generator is committed: the 36-body plate of
+2026-10-09 came from a one-off script.
+
 Patterns must survive a 0.4 mm erosion (feature ≥ 0.8 mm) and a 0.4 mm
 dilation without islands merging (gap ≥ 0.8 mm). On top of that every motif
 is an inlay on the design face, the first layer, printed in 0.5 mm lines on
 the textured plate, so `check_motifs.py` also asks for islands and gaps of
 1.0 mm; the twelve motifs drawn to the older rule are listed in
 `cap_motifs.FACE_PENDING` until they are redrawn. Every inlay together must
-leave ≥ 60 % of the LED ring (r 8.5–11.5) clear; `cap_marking.py` checks all
-three. Band patterns live in a fixed window (−10°…190°) that clears a 5-digit
-serial by 22°.
+leave ≥ 99.9 % of the LED ring (r 8.5–11.5) clear; `cap_marking.py` checks all
+three and refuses the design otherwise. Band patterns live in a fixed window
+(−10°…190°) that clears a 5-digit serial by more than 40° each side.
 
 After any change, re-run `verify.py` before printing. It is what caught the
 assembly-path defect described in `../DESIGN.md`.

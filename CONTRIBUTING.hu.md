@@ -17,7 +17,7 @@ A platform kódja (a weboldal) nem ebben a repóban van.
 | Te | Ezt tedd |
 |---|---|
 | Megvannak a fájljaid és van GitHub-fiókod, de nem akarsz JSON-t írni | Nyiss egy [új terv issue-t](https://github.com/Remeny-Farm/open-source-farming-catalog/issues/new?template=new-design.yml). Egy nyelv elég; a lektor hozzáteszi a másikat és elkészíti a pull requestet. |
-| Otthon vagy a gitben | Fork, `projects/<id>/` hozzáadása a [SUBMITTING.md](SUBMITTING.md) szerint, `npm ci && npm run validate`, majd pull request. |
+| Otthon vagy a gitben | Fork, `projects/<id>/` hozzáadása a [SUBMITTING.md](SUBMITTING.md) szerint, `npm ci && npm test && npm run validate`, majd pull request. |
 | Megépítettél egy listázott tervet | Küldj [építési jelentést](https://github.com/Remeny-Farm/open-source-farming-catalog/issues/new?template=build-report.yml). |
 
 Meglévő terv javításához nyiss [javítási issue-t](https://github.com/Remeny-Farm/open-source-farming-catalog/issues/new?template=fix-design.yml), vagy szerkeszd a projektkönyvtárat pull requestben.
@@ -41,9 +41,9 @@ A karbantartó minden pull requestet ez alapján néz át beolvasztás előtt:
 - a korlátok őszinték, és tartalmazzák a biztonsági tudnivalókat;
 - az állapotállítás alá van támasztva (fotó, laborjegyzet, építési jelentés);
 - a fotó valódi, és van eredetigazoló sidecarja;
-- az `npm run validate` zöld a CI-ban.
+- az `npm test` és az `npm run validate` zöld a CI-ban.
 
-A beolvasztott bejegyzés a következő platform-telepítés után jelenik meg a weboldalon, általában egy napon belül.
+A beolvasztott bejegyzés akkor kerül a weboldalra, amikor a karbantartó beolvasztja a weboldal következő tartalomfrissítését: egy automatikus pull requestet, amely a weboldalt ennek a repónak az új commitjára lépteti. Ez több napig is tarthat.
 
 ## A hozzájárulásod licence
 

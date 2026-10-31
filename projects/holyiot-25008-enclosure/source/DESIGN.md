@@ -6,17 +6,22 @@ Parametric two-part enclosure for the Holyiot 25008 tag, generated from code in
 `cad/hen_tag_enclosure.py`.
 
 - **Status**: Revision C. Geometry generated, machine-verified, exported.
-  **Revision C's coupon pair has been printed once (dimensions good); the
-  lock-up angle is unreported and the full cap unprinted.**
+  **The coupon pair has been printed once (dimensions good). Four per-hen
+  caps printed on 2026-10-04 run on to the channel end walls at 55° and stay
+  on when pulled (lab note 2026-10-09), and a body with the lugs turned 25°
+  puts the number at 6 o'clock (2026-10-12). The O-ring seal, water
+  resistance and the tabs under load are untested.**
 - **Revision A was printed and fitted** on a Bambu Lab P1S — dimensions good,
   and its thread mated on that one pair. See
   `docs/lab/2026-08-28-enclosure-print-trial.md`. Later caps tore along the
   thread, whose ridges compute to less than one extrusion wide; the thread
   was replaced by a bayonet on 2026-09-10. See
   `docs/lab/2026-09-10-thread-print-failure.md` and decision 9. The board
-  dimensions still are not empirical.
-- **Blocking caveat**: the board dimensions this design is built on are operator
-  caliper readings that carry an unresolved ambiguity. See
+  outline, thickness and parts come from the manufacturer STEP (2026-09-23,
+  `cad/board_holyiot_25008.py`).
+- **Blocking caveat**: the holder (Ø21 × 4.0 mm) and the total stack height
+  are still operator caliper readings with an unresolved ambiguity; the
+  ceiling tolerates a holder of 3.79–4.19 mm. See
   `docs/lab/2026-08-28-enclosure-board-measurements.md`.
 
 ---
@@ -27,7 +32,7 @@ Parametric two-part enclosure for the Holyiot 25008 tag, generated from code in
 |---|---|
 | Assembled envelope | **40.14 × 31.94 × 8.70 mm** (Ø31.94 body, tabs to 40.14) |
 | Printed mass (PETG) | **5.01 g** (body 2.71 + cap 2.30) |
-| Assembled mass | **9.92 g** — within the 10 g target (board mass from the manufacturer STEP; cell, holder and ring still estimates) |
+| Assembled mass | **9.92 g** — within the 10 g target (board from the manufacturer STEP; about 1.2 g, the board parts, holder and O-ring, still estimated) |
 | Orientation | Holder **down** toward the harness, PCB **up**, LED outward |
 | Sealing | Radial NBR O-ring, **ID 26.74 × CS 1.50 mm** |
 | Closure | Bayonet: 3 lugs × 20°, 0.80 mm proud, 55° clockwise to the channel end walls over self-locking helical ramps |
@@ -36,7 +41,7 @@ Parametric two-part enclosure for the Holyiot 25008 tag, generated from code in
 ```
                               Ø31.94
               ┌──────────────────────────────┐   cap top 1.10
-              │ ▁▁▁  Ø16 LED window  ▁▁▁     │   foam recess 0.30
+              │ ▁▁▁  clear LED ring  ▁▁▁     │   foam recess 0.30
          ═════╪══════════════════════════════╪═════  ceiling z=6.60
               │      ░░░   S1   ░░░          │   foam RING OD16/ID12 x 2.0
               │ ▓▓▓▓▓ PCB Ø25 ▓▓▓▓▓ z=4.81/6.41│   ← LED faces the cap
@@ -156,37 +161,40 @@ and inside the cap radius the space belongs to the rotating cap skirt. That root
 carries harness load in tension, not bending, across 13 mm of width — so the
 thin section is not the weak point it looks like. **Untested under load.**
 
-### 8. Customer cap: clear shell, big coin lettering, accent core
+### 8. Customer cap: base shell, clear LED ring, zone colours
 
-`cad/cap_marking.py <number>` generates the per-hen cap as three bodies for
-three filaments, delivered as a pre-registered Bambu project
-(`cap_<n>_P1S.3mf`, slots 1/2/3 pre-assigned) plus a vendor-neutral 3MF:
+`cad/cap_marking.py <number>` generates the per-hen cap from the patron's
+design. It writes the vendor-neutral `out/cap_<n>.3mf` and, with Bambu Studio
+installed, the pre-registered project `out/cap_<n>_P1S.3mf`. The cap is cut
+into up to four bodies, one per AMS slot:
 
-| Body | Filament | What it is |
+| Body | Slot | What it is |
 |---|---|---|
-| `cap_<n>` | **clear PETG** | the whole shell — closure, seal, envelope untouched |
-| `marking_<n>` | text colour | number (bottom arc, 6.0 pt), message (top arc, 5.2 pt caps), icon — 0.64 mm flush inlays |
-| `core_<n>` | accent colour | full disc Ø17.2, the icon cut from it — colours meet edge to edge |
+| `cap_<n>` | 1, scheme base | the shell: closure, seal and envelope untouched |
+| `window_<n>` | 2, Prusament PETG Clear | the LED ring r 8.5–11.5 through the whole top plate, plus any zone set to clear |
+| `a_<n>` | 3, scheme colour a | the zones and inlays set to `a` |
+| `b_<n>` | 4, scheme colour b | the zones and inlays set to `b` |
 
-Two print trials shaped this. The first (opaque shell + clear LED ring)
-proved the three-colour registration and the thread but the 2.9 mm lettering
-was unreadable. The second revision makes the whole shell clear: the LED
-(r 10.0, angle uncontrolled) shines through wherever it lands, so the window
-part and every angular-alignment concern disappear, and the lettering band
-grows to ~6 mm — letters twice the printed height, messages capped at
-**8 guaranteed / ~12 typical characters**. The generator is deterministic
-(fixed fonts, byte-identical output for identical input) and tested by a
-29-case suite: envelope, rejections, determinism, full Bambu export.
+The zones are `ring`, `number`, `disc`, `centre` and `band`
+(`cad/catalog.json`), and `--colours` gives each one `base`, `a`, `b` or
+`clear`. The number (4.5 pt, 1–5 digits) bends along the bottom arc between
+r 11.60 and 15.40. The staff-only `--top` message (3.6 pt, ALL CAPS) runs
+along the top arc, out to r 15.60. Font sizes are fixed: input that does not
+fit is refused with the measured numbers. The generator is deterministic
+(byte-identical output for identical input) and is tested by
+`test_cap_marking.py` (92 checks passed on 2026-10-04).
 
----|---|---|
-| `cap_<n>` | customer's cap colour, opaque | the shell — closure, seal, envelope untouched |
-| `marking_<n>` | customer's text colour | coin-style lettering + centre heart, a 0.64 mm flush inlay |
-| `window_<n>` | clear PETG | a **3.0 mm wide clear ring at r 10.0**, through the whole top plate |
+Earlier layouts did not last. The first print trial (opaque shell, clear LED
+ring, a 2.9 mm lettering band) proved the multi-colour registration, but its
+lettering was unreadable. A whole-clear shell followed. The customisation
+design of 2026-09-14 (decision 10) went back to the clear ring, with the
+number in 4.5 pt outside it.
 
-Because the cap prints top-plate-down, all three meet in the first layers
-against the plate: the outer face is one smooth plane, the id reads correctly
-from outside, and the window is flush on both faces. The marking never reaches
-the cavity (0.46 mm of shell above it); the window does, which is the point.
+Because the cap prints top-plate-down, all bodies meet in the first layers
+against the plate: the outer face is one smooth plane, the number reads
+correctly from outside, and the window is flush on both faces. The inlays
+stop 0.46 mm short of the cavity; the window and any zone in a, b or clear
+run through the whole plate.
 
 **Why a ring.** The LED centre sits at r 9.84 (manufacturer STEP; the caliper
 said 10.0), at −60° in the body frame. Its *angle* relative to the cap is not controlled —
@@ -204,43 +212,42 @@ cover the radial tolerance chain, which is small and known:
 | LED emitting-area half-size | ~0.8 | 0606–2020 package, UNVERIFIED |
 | **half-width needed** | **1.2** | → 2.4 mm minimum ring |
 
-The default is **3.0 mm** (r 8.5–11.5): 0.3 mm margin each side and ~7
-extrusion widths, so the colour boundary prints crisp. Narrower does not buy a
-larger id — at 2.5 mm the "67 ♥" sample is still 75 %, only the margin drops
-to 0.05 mm. `--ring-width` overrides; `--pill R THETA` gives the old local
-window for a cap whose registration has been proven on the bench.
+The ring is fixed at **3.0 mm** (r 8.5–11.5, `cap_marking.LED_RING`): 0.3 mm
+margin each side and ~7 extrusion widths, so the colour boundary prints crisp.
+There is no CLI override, and no inlay may cover more than 0.1 % of it.
 
-**Coin-style lettering.** The id no longer sits in the centre: it bends along
-the opaque band outside the clear ring (r 12.5–15.4), like the lettering on a
-coin — the id along the bottom arc with glyph tops toward the centre, an
-optional per-customer message (`--top "Szeretlek Bözsi!"`) along the top arc
-with tops outward, both reading left to right, the gaps falling on the tab
-axis. The centre inside the ring carries only the heart (`--no-heart` to omit).
-Fonts are fitted automatically: the largest size whose bent, dilated glyphs
-stay inside the band wins (the sample lands at 3.4 pt for the id, 3.2 pt for
-the message, thinnest feature 0.72 mm after the 0.2 mm dilation that makes
-hairline strokes printable). A message longer than ~200° of arc is refused
-rather than shrunk into illegibility.
+**Coin-style lettering.** The number does not sit in the centre: it bends
+along the band outside the clear ring (r 11.60–15.40), like the lettering on a
+coin, with glyph tops toward the centre. The optional staff-only message
+(`--top "Szeretlek Bözsi!"`) runs along the top arc with tops outward, out to
+r 15.60. Both read left to right, the gaps falling on the tab axis. The centre
+inside the ring carries an icon or a centre pattern (`--icon none` leaves it
+empty). Font sizes are fixed (4.5 pt number, 3.6 pt message), and glyphs are
+dilated so hairline strokes print; a feature under 0.58 mm is refused. A
+message longer than 200° of arc is refused rather than shrunk into
+illegibility.
 
 **What the ring costs.** The shell's central disc is joined to the rest of the
 shell only through the clear ring — fine for printing (same PETG, different
 pigment, fused in place) but worth knowing. The foam ring cannot stay at the
 rim, which is exactly the LED radius: it moves inboard to **OD 16 / ID 12**,
-where it bears on the board's r 6–8 zone. Whether that zone is free of tall or
-pressure-sensitive parts is **unverified**; the tactile switch near the centre
-is inside the ID.
-
-`--no-window` reproduces the earlier two-body transparent cap.
+where it bears on the board's r 6–8 zone. The manufacturer STEP shows what
+sits in that zone (decision 5); the tactile switch near the centre is inside
+the ID.
 
 ### 10. Per-hen customisation: patterns, catalog, batch plates
 
-Patrons choose a colour scheme (text + accent filament over the clear shell),
-an icon *or* a centre pattern, and a top-band pattern; the serial number is
-always on the cap. Everything a patron may choose is in `cad/catalog.json`,
-mirrored in the app. Locked designs are batched one scheme per plate, 6 × 6
-on the P1S, by `cad/cap_batch.py`; a 36-cap plate slices to 36 objects in an
-estimated 4 h 13 m (`docs/lab/2026-09-14-cap-batch-plate.md`, **no plate
-printed yet**). Design, constraints and the chirp-side requirements:
+Patrons choose a colour scheme (a base filament plus two free colours, a and
+b, beside the clear LED ring), an icon *or* a centre pattern, a top-band
+pattern and a colour per zone; the serial number is always on the cap.
+Everything a patron may choose is in `cad/catalog.json`, mirrored in the app.
+Locked designs are batched one scheme per plate, 6 × 6 on the P1S, by
+`cad/cap_batch.py`; a 36-cap plate slices to 36 objects in an estimated
+6 h 17 m with 20 filament changes
+(`docs/lab/2026-09-29-cap-plate-filament-slots.md`). The first production
+plate printed and failed, and its causes were fixed in the generator (lab
+notes 2026-09-30, 2026-10-04); the 2026-10-04 four-cap test plate was
+accepted on 2026-10-12. Design, constraints and the chirp-side requirements:
 `docs/superpowers/specs/2026-09-14-hen-cap-customisation-design.md`.
 
 ### 9. Bayonet, not a thread
@@ -298,7 +305,7 @@ rule of decision 2. `cap_marking.py` and the accessory-platform proposal
 inherit the new skirt untouched. The thread code is gone from the source
 (and with it the `bd_warehouse` dependency); commit `e3cf940` has it.
 
-**UNVERIFIED in fit.** The coupon pair has been printed once — dimensions
+**Fit partly verified.** The coupon pair has been printed once — dimensions
 good, lock-up angle not yet reported (lab note 2026-09-10, print trial 1).
 The 2026-10-04 caps on revision D bodies turn on to the end wall (lab note
 2026-10-09).
@@ -316,7 +323,7 @@ re-tune the body's `lug_phase` instead.
 |---|---|---|
 | O-ring | NBR, **ID 26.74 × CS 1.50 mm**, closest stock size | to source |
 | Foam ring | closed-cell PE/EVA, adhesive backed, **2.0 mm, OD 16 × ID 12** — a rim ring would sit on the LED | to source or punch |
-| Clear PETG | third filament for the LED window; the cap shell and id are now opaque colours | per print |
+| Clear PETG | Prusament PETG Clear in AMS slot 2 on every cap plate: the LED ring and any zone set to clear | per print |
 | Elastic | 8 mm figure-eight harness | cross-section UNVERIFIED |
 | Conformal coating | acrylic, per `docs/requirements.md` masking rules | unchanged |
 
@@ -341,6 +348,14 @@ re-tune the body's `lug_phase` instead.
 
 `cad/out/hen_tag_revC_P1S.3mf` (from `slice_check.py --project`) carries all
 four printables and these settings as a Bambu Studio project.
+
+**Variable layer height: not used for the cap face** (decided 2026-10-04).
+The face's look is set in XY (line width, flow, squish, plate texture). A
+thinner first layer caused the 2026-09-29 plate failure. Thinner layers
+through the 1.1 mm multi-colour top plate would roughly double the filament
+changes (about 24 → 45 on the test plate) and push the 0.64 mm inlay
+boundary onto a mid-layer. Thicker layers in the skirt above 1.1 mm remain a
+candidate for saving print time. <!-- INFERRED: verify (from the owner session of 2026-10-04) -->
 
 The exported STLs lie in their print orientation: the body floor-down, the cap
 and the female coupon flipped top-plate-down. Do not re-orient them. Left as
@@ -372,10 +387,11 @@ travels longer than 3 mm passing within 12 mm of the axis over open air:
 The revision B threaded cap measured 106 on the stock profile, so this is
 not a cost of the bayonet; it was always there, hidden inside a closed cap.
 
-The coupons (`coupon_body.stl` 1.70 g, `coupon_cap.stl` 1.22 g) carry the
+The coupons (`coupon_body.stl` 1.70 g, `coupon_cap.stl` 1.16 g) carry the
 bayonet pair and the groove and nothing else, at the real parts' z stations.
-**The bayonet fit has not been printed anywhere yet**, so print the pair
-first. The cap should turn 55° to the end wall, where it rests (2026-10-09). If
+The coupon pair has printed once and four caps rest on the end wall (lab
+notes 2026-09-10, 2026-10-09); on a new printer, print the pair first. The
+cap should turn 55° to the end wall, where it rests (2026-10-09). If
 it locks up well before that the parts are tight. Report the angle and change
 `lug_phase` on the body (`cam_lock` moves the cap's channels, so it is for caps
 not yet printed), or `fit_lug_r` if the lugs bind radially, then regenerate;
@@ -427,15 +443,17 @@ do not file the parts.
 - O-ring never crosses the lugs: groove starts z 3.91, channels end z 3.40
 - slicer support with support enabled: **none** on body, cap and both coupons (Bambu Studio CLI)
 - O-ring squeeze: **22 %** (static radial target is 15–30 %)
-- thinnest wall: **0.80 mm** under the grip scallops
+- thinnest wall: **0.80 mm** between the cap and the tab slot (0.85 mm under
+  the grip scallops)
 - 8.0 mm elastic threads the tab slot: **0.000 mm³** obstructing
 - tab bar cross-section: **4.80 mm²**
 - underside flat: **0.000 mm³** below the floor plane
 - assembled envelope: 40.14 × 31.94 × 8.70 mm
-- worst unsupported overhang band: **3.03 mm²** on the body (the lugs' bearing
-  flats), 96.33 mm² on the cap (the O-ring groove flank, which becomes a
-  ceiling once the cap is flipped; unchanged since revision A). The cap's total
-  fell from 242 to 115 mm² with the thread gone.
+- worst unsupported overhang band: **0.59 mm²** at z 1.8 on the body; none
+  above the bed on the cap. The limit is 1.0 mm² per 0.1 mm band on both parts
+  (`CLUSTER_LIMIT` in `verify.py`). Since 2026-09-24 the lug
+  undersides, lip tops and the O-ring groove flank are 50° cones, so only the
+  0.10 mm lug flat against the seal band remains.
 - meshes watertight: 0 non-manifold edges, 0 loose vertices, positive volume
 - **sliced clean in Bambu Studio** (revision C, 2026-09-10): all four parts,
   zero warnings; open-air travels with the recommended settings: cap 19,
@@ -458,12 +476,12 @@ Confirmed by slicing both versions:
 A second, smaller floating feature was found in the same pass: the thread began
 0.2 mm above the base flange, leaving its first ridge unsupported. The thread now
 starts flush on the flange, which took the body's worst overhang band from
-18.95 mm² down to 9.36 mm² (revision B; with the thread replaced by the bayonet in
-revision C it is 3.03 mm²).
+18.95 mm² down to 9.36 mm² (revision B; the bayonet and the 2026-09-24 cones
+removed the rest).
 
-`verify.py` now measures unsupported overhang area per part against limits
-calibrated to revision A, which is known to print, so this class of defect
-cannot return unnoticed.
+`verify.py` now measures unsupported overhang area per part, per 0.1 mm
+height band, against a 1.0 mm² limit, so this class of defect cannot return
+unnoticed.
 
 Mesh volume matches the solid model to within 0.3 mm³, so STL tessellation is
 not distorting the geometry.
@@ -471,10 +489,10 @@ not distorting the geometry.
 **What revision A proved**: printed on a Bambu Lab P1S, dimensions and thread
 fit both confirmed good on physical parts.
 
-**What none of this proves**: the bayonet's fit. The coupon pair has been
-printed once (dimensions good, lock-up angle not yet reported); the full cap
-has not been printed. No O-ring has been compressed, no water
-has touched it, no elastic has loaded a tab, and no hen has worn it.
+**What none of this proves**: the seal. The coupon pair and four per-hen
+caps are printed and fitted (lab notes 2026-09-10, 2026-10-09); no O-ring has
+been compressed, no water has touched it, no elastic has loaded a tab, and no
+hen has worn it.
 
 ---
 
@@ -521,18 +539,18 @@ has touched it, no elastic has loaded a tab, and no hen has worn it.
 
 ## Open Questions & Next Steps
 
-1. **Check the full cap**: that the LED is actually visible through the Ø16
-   foam window, and that a tab survives being loaded with an elastic. The
-   revision B body has already accepted the board, and a body with the
+1. **Check the assembled tag**: that the LED is actually visible through the
+   clear LED ring (r 8.5–11.5), and that a tab survives being loaded with an
+   elastic. The revision B body has already accepted the board, and a body with the
    turned lugs puts a test cap's number at 6 o'clock (lab note 2026-10-09).
 2. **Measure the total stack height** in one caliper span and the assembly mass
    on a scale. Both feed straight back into `Params`.
 3. **Source the O-ring** at ID 26.74 × CS 1.50 mm, or report the nearest stock
    size available so the groove can be re-cut to it.
-4. **Mass**: revision B lands 0.89 g over a 10 g target, up from 0.19 g, because
-   the cell fill costs about 0.7 g. Roughly 1.0 g of the total is still
-   estimated rather than weighed. If the weighed figures confirm the overrun,
-   the cheapest reductions are lightening the fill in its thick sector, the cap
+4. **Mass**: the current model lands at 9.92 g (`hen_tag_enclosure.py` mass
+   summary), 0.08 g under the 10 g target. About 1.2 g of the total (board parts,
+   holder, O-ring) is still estimated rather than weighed. If the weighed
+   figures overrun, the cheapest reductions are lightening the fill in its thick sector, the cap
    top plate, and the base flange — but a decision on whether 10 g is a hard
    welfare limit or a design aspiration should come first.
 5. **No ingress rating is claimed.** IP54 remains an intent, not a test result.
