@@ -98,6 +98,8 @@ def validate_design(cat: dict, d: dict) -> list[str]:
     colours = d.get("colours")
     if colours is None:
         colours = default_colours(cat)
+    elif not isinstance(colours, dict):
+        errs.append("colours must be an object")
     else:
         for z in ZONES:
             if colours.get(z) not in COLOUR_ROLES:
