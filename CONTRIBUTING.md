@@ -17,7 +17,7 @@ Platform code (the website) is not in this repository.
 | You | Do this |
 |---|---|
 | Have the files and a GitHub account, do not want to write JSON | Open a [new design issue](https://github.com/Remeny-Farm/open-source-farming-catalog/issues/new?template=new-design.yml). One language is enough; the reviewer adds the other and prepares the pull request. |
-| Comfortable with git | Fork, add `projects/<id>/` as described in [SUBMITTING.md](SUBMITTING.md), run `npm ci && npm run validate`, open a pull request. |
+| Comfortable with git | Fork, add `projects/<id>/` as described in [SUBMITTING.md](SUBMITTING.md), run `npm ci && npm test && npm run validate`, open a pull request. |
 | Built a listed design | File a [build report](https://github.com/Remeny-Farm/open-source-farming-catalog/issues/new?template=build-report.yml). |
 
 For a fix to an existing design, either open a [fix issue](https://github.com/Remeny-Farm/open-source-farming-catalog/issues/new?template=fix-design.yml) or edit the project directory in a pull request.
@@ -41,9 +41,9 @@ The maintainer checks every pull request against this list before merging:
 - limitations are honest and include safety notes;
 - the stage claim is supported (photo, lab note, build report);
 - the photo is real and has a provenance sidecar;
-- `npm run validate` passes in CI.
+- `npm test` and `npm run validate` pass in CI.
 
-A merged entry appears on the website after the next platform deployment, usually within a day.
+A merged entry goes live after the maintainer merges the website's next content update, an automated pull request that moves the website to the new commit of this repository. This can take several days.
 
 ## Licences of your contribution
 

@@ -1,5 +1,7 @@
 # Hen Cap Customisation Implementation Plan
 
+> **Status: executed, history only (verified 2026-10-27).** Built on 2026-09-14 in the archived `Remeny-Farm/hen-tag-enclosure` (see *Outcome* in the [spec](../specs/2026-09-14-hen-cap-customisation-design.md)) and imported here on 2026-09-26; the boxes below were never ticked. Do not execute this plan: its design-hash v1 test vectors and AMS slot order are superseded. Current state: [`../../../DESIGN.md`](../../../DESIGN.md) decision 10, [`../../../cad/README.md`](../../../cad/README.md) and `cad/cap_design.py` (design hash v2); the live editor is chirp `packages/real-chicken-ui/src/cap-editor/`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Patrons design their hen's cap (scheme, icon or centre pattern, band pattern) in a drop-in React editor; staff batch one scheme's locked caps onto a 6 × 6 P1S plate with one CLI command.
