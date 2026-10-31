@@ -36,7 +36,17 @@ export type CatalogEntry = { id: string; name: { hu: string; en: string }; pack?
 
 export type WalletView = { balance: bigint };
 
-export type ClientErrorCode = 'INSUFFICIENT_GRAIN' | 'DESIGN_BATCHED' | 'CATALOG_MISMATCH' | 'SCHEME_RETIRED' | 'NOT_EDITABLE' | 'UNKNOWN';
+// Every code the client seam may reject with; unknown codes (a Node system
+// error like ECONNREFUSED, a PostgREST PGRST301) are not ClientErrors.
+const CLIENT_ERROR_CODES = [
+  'INSUFFICIENT_GRAIN',
+  'DESIGN_BATCHED',
+  'CATALOG_MISMATCH',
+  'SCHEME_RETIRED',
+  'NOT_EDITABLE',
+  'UNKNOWN',
+] as const;
+export type ClientErrorCode = (typeof CLIENT_ERROR_CODES)[number];
 export type ClientError = { code: ClientErrorCode };
 
 // The only seam between the editor and chirp: the prototype ships an
@@ -103,7 +113,7 @@ export type CapEditorCopy = {
 };
 
 export function isClientError(e: unknown): e is ClientError {
-  return typeof e === 'object' && e !== null && typeof (e as ClientError).code === 'string';
+  return typeof e === 'object' && e !== null && CLIENT_ERROR_CODES.includes((e as ClientError).code);
 }
 
 export function defaultColours(catalog: Catalog): ZoneColours {
