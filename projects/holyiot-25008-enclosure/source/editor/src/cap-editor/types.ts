@@ -36,7 +36,7 @@ export type CatalogEntry = { id: string; name: { hu: string; en: string }; pack?
 
 export type WalletView = { balance: bigint };
 
-export type ClientErrorCode = 'INSUFFICIENT_GRAIN' | 'DESIGN_BATCHED' | 'CATALOG_MISMATCH' | 'SCHEME_RETIRED' | 'NOT_EDITABLE';
+export type ClientErrorCode = 'INSUFFICIENT_GRAIN' | 'DESIGN_BATCHED' | 'CATALOG_MISMATCH' | 'SCHEME_RETIRED' | 'NOT_EDITABLE' | 'UNKNOWN';
 export type ClientError = { code: ClientErrorCode };
 
 // The only seam between the editor and chirp: the prototype ships an

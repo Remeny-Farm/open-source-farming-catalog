@@ -71,6 +71,7 @@ export const hu = {
       CATALOG_MISMATCH: 'Ez a kombináció nem elérhető.',
       SCHEME_RETIRED: 'Ez a paletta már nem választható, ezért ez a kupak nem szerkeszthető újra.',
       NOT_EDITABLE: 'Ez a kupak most nem módosítható.',
+      UNKNOWN: 'Valami hiba történt. Kérjük, próbáld újra.',
     },
   } satisfies CapEditorCopy,
 };

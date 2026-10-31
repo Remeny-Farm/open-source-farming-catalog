@@ -72,6 +72,7 @@ export const en = {
       CATALOG_MISMATCH: 'That combination is not available.',
       SCHEME_RETIRED: 'This palette is no longer offered, so this cap cannot be edited again.',
       NOT_EDITABLE: 'This cap cannot be changed right now.',
+      UNKNOWN: 'Something went wrong. Please try again.',
     },
   } satisfies CapEditorCopy,
 };
