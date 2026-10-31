@@ -54,6 +54,12 @@ def ids(cat: dict, key: str) -> list[str]:
     return [e["id"] for e in cat[key]]
 
 
+# INVARIANT: design_hash (HASH_VERSION 2, these keys, this canonical JSON) and catalog.json
+# are a contract with the app: chirp packages/shared-types/src/hen-cap.ts (henCapDesignHash,
+# the hen-cap-batch/1 schema) with its i18n/hen-cap-catalog.json copy, and
+# editor/src/cap-editor/design-hash.ts here. Change all sides together and keep the test
+# vectors in test_cap_marking.py and design-hash.test.ts equal; cap_batch.py refuses a batch
+# whose generator_version differs from catalog.json. See cad/README.md "Batch workflow".
 def design_hash(serial: int, scheme: str, icon: str | None,
                 centre: str | None, band: str | None, colours: dict) -> str:
     """First 16 hex chars of SHA-256 over the canonical design JSON.
