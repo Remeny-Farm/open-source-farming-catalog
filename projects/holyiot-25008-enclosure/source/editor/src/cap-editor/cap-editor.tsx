@@ -433,5 +433,5 @@ export function CapEditor({ henId, client, catalog, layout, copy, walletCopy, lo
 }
 
 function codeOf(e: unknown): ClientErrorCode {
-  return isClientError(e) ? e.code : 'NOT_EDITABLE';
+  return isClientError(e) ? e.code : 'UNKNOWN';
 }

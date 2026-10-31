@@ -7,7 +7,7 @@ import { CapEditor } from './cap-editor.js';
 import catalog from './data/catalog.json';
 import layout from './data/layout.json';
 import { createMockClient } from './mock-client.js';
-import { defaultColours, type CapDesign } from './types.js';
+import { defaultColours, type CapDesign, type CapDesignClient } from './types.js';
 
 const dc = defaultColours(catalog);
 const hen: CapDesign = {
@@ -21,6 +21,14 @@ function setup(balance = 1000n, status: CapDesign['status'] = 'draft', scheme = 
     <CapEditor henId="h1" client={client} catalog={catalog} layout={layout} copy={en.capEditor} walletCopy={en.wallet} locale="en-US" />,
   );
   return client;
+}
+
+// The same render as setup, around a client whose seam fails the way a real
+// network or backend failure does: with an error that is not a ClientError.
+function setupWithClient(client: CapDesignClient) {
+  render(
+    <CapEditor henId="h1" client={client} catalog={catalog} layout={layout} copy={en.capEditor} walletCopy={en.wallet} locale="en-US" />,
+  );
 }
 
 const tab = (name: string) => screen.getByRole('tab', { name: new RegExp(name) });
@@ -76,6 +84,28 @@ test('insufficient grain shows the mapped error and stays a draft', async () => 
   await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: en.capEditor.lockConfirm }));
   expect(await screen.findByRole('alert')).toHaveTextContent(en.capEditor.errors.INSUFFICIENT_GRAIN);
   expect(screen.getByText(en.capEditor.status.draft)).toBeInTheDocument();
+});
+
+test('a save that fails with a TypeError (network down) shows the generic error, not "cannot be changed"', async () => {
+  setupWithClient({
+    ...createMockClient({ hens: [hen], balance: 1000n, catalog }),
+    save: () => Promise.reject(new TypeError('fetch failed')),
+  });
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole('radio', { name: 'Gold' }));
+  const alert = await screen.findByRole('alert');
+  expect(alert).toHaveTextContent(en.capEditor.errors.UNKNOWN);
+  expect(alert).not.toHaveTextContent(en.capEditor.errors.NOT_EDITABLE);
+});
+
+test('a load that fails with a plain Error shows the generic error on the loading screen', async () => {
+  setupWithClient({
+    ...createMockClient({ hens: [hen], balance: 1000n, catalog }),
+    load: () => Promise.reject(new Error('backend down')),
+  });
+  const alert = await screen.findByRole('alert');
+  expect(alert).toHaveTextContent(en.capEditor.errors.UNKNOWN);
+  expect(alert).not.toHaveTextContent(en.capEditor.errors.NOT_EDITABLE);
 });
 
 test('the icon colour sits right under the icon rail, clear allowed, the disc colour blocked and explained', async () => {
