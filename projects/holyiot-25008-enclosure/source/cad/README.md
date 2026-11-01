@@ -171,8 +171,11 @@ sweep helper so their bearing faces share a pitch.
    positions `1A`…`6F`) and `proof/<design_hash>.svg`, then slices the plate
    through Bambu Studio and reports objects, warnings, the time estimate,
    which filament slots extruded and which the AMS loads; it fails unless
-   every assigned slot did both. A passing plate gets its sliced project next
-   to it, `plate_<id>_P1S.gcode.3mf`.
+   every assigned slot did both. One Bambu Studio log line is whitelisted
+   as a known note, not an error: Arachne's `Reversing even wall line ...`
+   (a closed even-width wall loop reversed for orientation; the plate still
+   exports — `KNOWN_SLICER_NOTES` in `slice_check.py`). A passing plate gets
+   its sliced project next to it, `plate_<id>_P1S.gcode.3mf`.
 3. Print `plate_<id>_P1S.gcode.3mf` as it is: open it in Bambu Studio (it
    opens in the preview) and send it, or copy it to the printer. Do not
    re-slice the `.3mf` in the GUI: the 2026-09-29 plate went through the GUI
