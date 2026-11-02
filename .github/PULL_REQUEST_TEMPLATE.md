@@ -1,4 +1,4 @@
-<!-- One project per pull request. Delete lines that do not apply. / Egy projekt PR-onként. -->
+<!-- One project per pull request. Delete lines that do not apply. / Egy projekt PR-onként. Töröld a nem releváns sorokat. -->
 
 ## Project / Projekt
 
@@ -16,8 +16,8 @@
 - [ ] `limitations` is honest and includes safety notes. / A `limitations` őszinte, és tartalmazza a biztonsági tudnivalókat.
 - [ ] `stage` is supported by evidence (photo, lab note, build report). / Az állapotot bizonyíték támasztja alá.
 - [ ] The photo is a real photograph of the real object, generated with `npm run photo`, with its provenance sidecar. / A fotó valódi, `npm run photo`-val készült, sidecarral.
-- [ ] Every served file is listed in `files` with its sha256 (`npm run hash`) and is under 20 MB. / Minden kiszolgált fájl a `files`-ban van sha256-tal, 20 MB alatt.
-- [ ] `npm run validate` passes locally. / Az `npm run validate` helyben zöld.
+- [ ] Every file outside `photos/` that the website should serve is listed in `files` with its sha256 (`npm run hash`) and is under 20 MB. / A `photos/`-on kívül minden kiszolgálandó fájl a `files`-ban van sha256-tal, 20 MB alatt.
+- [ ] `npm test` and `npm run validate` pass locally. / Az `npm test` és az `npm run validate` helyben zöld.
 
 ## For the reviewer / A lektornak
 

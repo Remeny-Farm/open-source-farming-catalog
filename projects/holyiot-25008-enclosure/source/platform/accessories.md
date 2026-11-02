@@ -47,7 +47,8 @@ printed by the farm only after passing the checklist.
 | **Flush medallion** | Full-face disc with relief motif, clear window over the LED ring, seasonal/patron themes | ~2.5 g | 1.5 mm |
 | **Low dome** | Rounded "hat" silhouette, recognizable at distance | ~4 g | 6 mm |
 
-All three print in the existing three-filament pipeline; per-patron variants
+All three print in the existing four-slot cap pipeline (AMS 1 base, 2 clear,
+3 and 4 the scheme colours); per-patron variants
 can reuse the deterministic `cap_marking.py` approach (same font/arc rules) on
 the accessory face, so the cap id and the accessory never disagree.
 

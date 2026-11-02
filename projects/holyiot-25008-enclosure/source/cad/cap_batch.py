@@ -28,6 +28,7 @@ import argparse
 import csv
 import json
 import pickle
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -38,10 +39,17 @@ from bambu_project import PLATE_MAX, grid_label, grid_positions, write_plate  # 
 from cap_design import ids, load_catalog, validate_design  # noqa: E402
 
 BATCH_SCHEMA = "hen-cap-batch/1"
+# batch_id lands in file names (plate_<batch_id>_*) and unescaped in the 3MF
+# Title, so it must stay path-safe and XML-safe: one leading alphanumeric,
+# then alphanumerics, "_" and "-", at most 80 chars (the app's batch keys,
+# YYYY-MM-DD-<scheme>-NN, fit).
+BATCH_ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,79}")
 
 
 def validate_batch(batch: dict, cat: dict) -> list[str]:
     errs = []
+    if not isinstance(batch, dict):
+        return ["batch must be a JSON object"]
     if batch.get("schema") != BATCH_SCHEMA:
         errs.append(f"unsupported batch schema {batch.get('schema')!r}")
     if batch.get("generator_version") != cat["generator_version"]:
@@ -49,11 +57,20 @@ def validate_batch(batch: dict, cat: dict) -> list[str]:
                     f"{cat['generator_version']!r}: deploy the same catalog on both sides")
     if batch.get("scheme") not in ids(cat, "schemes"):
         errs.append(f"unknown scheme {batch.get('scheme')!r}")
-    caps = batch.get("caps") or []
-    if not 1 <= len(caps) <= PLATE_MAX:
+    bid = batch.get("batch_id")
+    if not isinstance(bid, str) or not BATCH_ID_RE.fullmatch(bid):
+        errs.append(f"batch_id {bid!r} must match [A-Za-z0-9][A-Za-z0-9_-]{{0,79}}")
+    caps = batch.get("caps")
+    if not isinstance(caps, list):
+        errs.append("caps must be a list")
+        caps = []
+    elif not 1 <= len(caps) <= PLATE_MAX:
         errs.append(f"a plate holds 1..{PLATE_MAX} caps, batch has {len(caps)}")
     seen = set()
     for i, c in enumerate(caps):
+        if not isinstance(c, dict):
+            errs.append(f"cap {i}: must be an object")
+            continue
         d = {"serial": c.get("serial"), "scheme": batch.get("scheme"), "icon": c.get("icon"),
              "centre": c.get("centre"), "band": c.get("band"), "design_hash": c.get("design_hash"),
              "colours": c.get("colours")}
@@ -62,9 +79,11 @@ def validate_batch(batch: dict, cat: dict) -> list[str]:
             continue
         for e in validate_design(cat, d):
             errs.append(f"cap {i} (serial {c.get('serial')}): {e}")
-        if c.get("serial") in seen:
-            errs.append(f"cap {i}: duplicate serial {c.get('serial')}")
-        seen.add(c.get("serial"))
+        serial = c.get("serial")
+        if isinstance(serial, int) and not isinstance(serial, bool):
+            if serial in seen:
+                errs.append(f"cap {i}: duplicate serial {serial}")
+            seen.add(serial)
     return errs
 
 

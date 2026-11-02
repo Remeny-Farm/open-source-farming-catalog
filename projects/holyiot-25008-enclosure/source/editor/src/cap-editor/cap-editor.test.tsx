@@ -7,20 +7,28 @@ import { CapEditor } from './cap-editor.js';
 import catalog from './data/catalog.json';
 import layout from './data/layout.json';
 import { createMockClient } from './mock-client.js';
-import { defaultColours, type CapDesign } from './types.js';
+import { defaultColours, type CapDesign, type CapDesignClient } from './types.js';
 
 const dc = defaultColours(catalog);
 const hen: CapDesign = {
-  henId: 'h1', serial: 67, scheme: 'pasture', icon: 'heart', centre: null, band: null, colours: dc,
+  henId: 'h1', serial: 67, scheme: 'eggshell', icon: 'heart', centre: null, band: null, colours: dc,
   status: 'draft', designHash: '', proofUrl: null,
 };
 
-function setup(balance = 1000n, status: CapDesign['status'] = 'draft') {
-  const client = createMockClient({ hens: [{ ...hen, status }], balance, catalog });
+function setup(balance = 1000n, status: CapDesign['status'] = 'draft', scheme = hen.scheme) {
+  const client = createMockClient({ hens: [{ ...hen, status, scheme }], balance, catalog });
   render(
     <CapEditor henId="h1" client={client} catalog={catalog} layout={layout} copy={en.capEditor} walletCopy={en.wallet} locale="en-US" />,
   );
   return client;
+}
+
+// The same render as setup, around a client whose seam fails the way a real
+// network or backend failure does: with an error that is not a ClientError.
+function setupWithClient(client: CapDesignClient) {
+  render(
+    <CapEditor henId="h1" client={client} catalog={catalog} layout={layout} copy={en.capEditor} walletCopy={en.wallet} locale="en-US" />,
+  );
 }
 
 const tab = (name: string) => screen.getByRole('tab', { name: new RegExp(name) });
@@ -31,7 +39,7 @@ test('opens on the palette step with the cap on stage, the wallet and the summar
   expect(screen.getByLabelText('1,000 Golden Grain')).toBeInTheDocument();
   expect(screen.getByRole('tablist', { name: en.capEditor.stepsLabel })).toBeInTheDocument();
   expect(tab('Palette')).toHaveAttribute('aria-selected', 'true');
-  expect(screen.getByRole('radio', { name: 'Blue-dye' })).toBeInTheDocument();
+  expect(screen.getByRole('radio', { name: 'Lavender' })).toBeInTheDocument();
   expect(screen.getByText(en.capEditor.hints.palette)).toBeInTheDocument();
   expect(screen.getByText(en.capEditor.summaryLabel)).toBeInTheDocument();
 });
@@ -50,7 +58,7 @@ test('the steps are a keyboard tablist and Next walks through them', async () =>
 });
 
 test('locking a paid scheme with a Drop icon and a Vibe band charges the itemised total and celebrates', async () => {
-  const client = setup(1000n);
+  const client = setup(2000n);
   const user = userEvent.setup();
   await user.click(await screen.findByRole('radio', { name: 'Gold' }));
   await user.click(tab('Motif'));
@@ -63,7 +71,7 @@ test('locking a paid scheme with a Drop icon and a Vibe band charges the itemise
   expect(dialog).toHaveTextContent(en.capEditor.hints.lock);
   await user.click(within(dialog).getByRole('button', { name: en.capEditor.lockConfirm }));
   await waitFor(() => expect(screen.getByText(en.capEditor.status.locked)).toBeInTheDocument());
-  expect((await client.getWallet()).balance).toBe(1000n - 500n - 80n - 30n);
+  expect((await client.getWallet()).balance).toBe(2000n - 500n - 850n - 50n);
   expect(screen.getByRole('status')).toHaveTextContent(en.capEditor.celebrate);
   expect(screen.getByRole('button', { name: /Edit again/ })).toBeInTheDocument();
 });
@@ -71,11 +79,44 @@ test('locking a paid scheme with a Drop icon and a Vibe band charges the itemise
 test('insufficient grain shows the mapped error and stays a draft', async () => {
   setup(10n);
   const user = userEvent.setup();
-  await user.click(await screen.findByRole('radio', { name: 'Blue-dye' }));
+  await user.click(await screen.findByRole('radio', { name: 'Lavender' }));
   await user.click(screen.getByRole('button', { name: en.capEditor.lock }));
   await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: en.capEditor.lockConfirm }));
   expect(await screen.findByRole('alert')).toHaveTextContent(en.capEditor.errors.INSUFFICIENT_GRAIN);
   expect(screen.getByText(en.capEditor.status.draft)).toBeInTheDocument();
+});
+
+test('a save that fails with a TypeError (network down) shows the generic error, not "cannot be changed"', async () => {
+  setupWithClient({
+    ...createMockClient({ hens: [hen], balance: 1000n, catalog }),
+    save: () => Promise.reject(new TypeError('fetch failed')),
+  });
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole('radio', { name: 'Gold' }));
+  const alert = await screen.findByRole('alert');
+  expect(alert).toHaveTextContent(en.capEditor.errors.UNKNOWN);
+  expect(alert).not.toHaveTextContent(en.capEditor.errors.NOT_EDITABLE);
+});
+
+test('a save that fails with an error carrying an unknown string code (ECONNREFUSED) shows the generic error', async () => {
+  setupWithClient({
+    ...createMockClient({ hens: [hen], balance: 1000n, catalog }),
+    save: () => Promise.reject({ code: 'ECONNREFUSED' }),
+  });
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole('radio', { name: 'Gold' }));
+  const alert = await screen.findByRole('alert');
+  expect(alert).toHaveTextContent(en.capEditor.errors.UNKNOWN);
+});
+
+test('a load that fails with a plain Error shows the generic error on the loading screen', async () => {
+  setupWithClient({
+    ...createMockClient({ hens: [hen], balance: 1000n, catalog }),
+    load: () => Promise.reject(new Error('backend down')),
+  });
+  const alert = await screen.findByRole('alert');
+  expect(alert).toHaveTextContent(en.capEditor.errors.UNKNOWN);
+  expect(alert).not.toHaveTextContent(en.capEditor.errors.NOT_EDITABLE);
 });
 
 test('the icon colour sits right under the icon rail, clear allowed, the disc colour blocked and explained', async () => {
@@ -122,7 +163,7 @@ test('a locked design is frozen with an explanation; re-editing takes two taps a
   const user = userEvent.setup();
   const button = await screen.findByRole('button', { name: /Edit again/ });
   expect(screen.getByText(en.capEditor.hints.readOnly)).toBeInTheDocument();
-  expect(screen.getByRole('radio', { name: 'Blue-dye' })).toBeDisabled();
+  expect(screen.getByRole('radio', { name: 'Lavender' })).toBeDisabled();
   await user.click(button);
   await user.click(screen.getByRole('button', { name: en.capEditor.confirmAgain }));
   await waitFor(() => expect(screen.getByText(en.capEditor.status.draft)).toBeInTheDocument());
@@ -133,4 +174,14 @@ test('installed caps offer a replacement for the fee and no lock button', async 
   setup(1000n, 'installed');
   expect(await screen.findByRole('button', { name: /Request a replacement/ })).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: en.capEditor.lock })).toBeNull();
+});
+
+test('only offered palettes are choices; a retired one the cap carries is shown disabled with a badge', async () => {
+  setup(1000n, 'locked', 'bluedye');
+  const current = await screen.findByRole('radio', { name: 'Blue-dye' });
+  expect(current).toBeChecked();
+  expect(current).toBeDisabled();
+  expect(screen.getByText(en.capEditor.retiredBadge)).toBeInTheDocument();
+  expect(screen.queryByRole('radio', { name: 'Pasture' })).toBeNull();
+  expect(screen.getAllByRole('radio', { name: 'Gold' })).toHaveLength(1);
 });

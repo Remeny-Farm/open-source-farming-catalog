@@ -1,5 +1,6 @@
 import { designHash } from './design-hash.js';
 import {
+  isRetiredScheme,
   lockPrice,
   validateDraft,
   type CapDesign,
@@ -48,6 +49,7 @@ export function createMockClient(seed: { hens: CapDesign[]; balance: bigint; cat
       const h = find(henId);
       if (h.status !== 'draft') throw err('NOT_EDITABLE');
       if (validateDraft(cat, draft).length > 0) throw err('CATALOG_MISMATCH');
+      if (isRetiredScheme(cat, draft.scheme)) throw err('SCHEME_RETIRED');
       Object.assign(h, draft, { colours: { ...draft.colours }, designHash: await designHash({ ...draft, serial: h.serial }) });
       return { ...h, colours: { ...h.colours } };
     },
@@ -55,6 +57,7 @@ export function createMockClient(seed: { hens: CapDesign[]; balance: bigint; cat
       const h = find(henId);
       if (h.status !== 'draft') throw err('NOT_EDITABLE');
       if (validateDraft(cat, toDraft(h)).length > 0) throw err('CATALOG_MISMATCH');
+      if (isRetiredScheme(cat, h.scheme)) throw err('SCHEME_RETIRED');
       charge(lockPrice(cat, h));
       Object.assign(h, { status: 'locked', designHash: await designHash(h) });
       return { ...h, colours: { ...h.colours } };
@@ -62,6 +65,9 @@ export function createMockClient(seed: { hens: CapDesign[]; balance: bigint; cat
     async unlockForEdit(henId) {
       const h = find(henId);
       if (h.status !== 'locked') throw err(h.status === 'draft' ? 'NOT_EDITABLE' : 'DESIGN_BATCHED');
+      // A retired palette cannot be saved or locked again, so a re-edit of it
+      // would take the fee and strand the cap.
+      if (isRetiredScheme(cat, h.scheme)) throw err('SCHEME_RETIRED');
       charge(BigInt(cat.fees.reedit_grain));
       h.status = 'draft';
       return { ...h, colours: { ...h.colours } };

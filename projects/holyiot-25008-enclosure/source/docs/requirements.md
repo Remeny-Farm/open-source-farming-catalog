@@ -3,13 +3,16 @@
 ## Purpose & Status
 This document specifies the mechanical design criteria, material selection, sealing mechanisms, and PCB coating procedures for the active hen tag enclosure.
 - **Status**: Revision C (bayonet closure). Parametric CAD generated and
-  machine-verified. **Revision A was printed and fitted on a Bambu Lab P1S —
-  dimensions good; its thread mated on that pair, but later caps tore along it,
-  so revision C replaced the thread with a bayonet (UNVERIFIED, no coupon
-  printed). A revision B body was also printed and accepted the board; the cap
-  and complete sealed assembly remain untested.**
+  machine-verified (40 checks in `../cad/verify.py`). **Revision A was printed
+  and fitted on a Bambu Lab P1S; its thread mated on that pair, but later caps
+  tore along it, so revision C replaced the thread with a bayonet. The bayonet
+  coupon pair has printed once (dimensions good), and four per-hen caps
+  printed on 2026-10-04 rest on the channel end walls and stay on when pulled
+  ([`lab/2026-10-09-cap-rest-angle.md`](lab/2026-10-09-cap-rest-angle.md)). A
+  revision B body was also printed and accepted the board; the O-ring seal and
+  the complete sealed assembly remain untested.**
 - **Source of truth for geometry**: [`DESIGN.md`](../DESIGN.md) and `../cad/hen_tag_enclosure.py`. Where this document and `DESIGN.md` disagree on the sealing arrangement, `DESIGN.md` is current — see "Sealing" below.
-- Board dimensions remain operator caliper readings with one unresolved ambiguity: [`docs/lab/2026-08-28-enclosure-board-measurements.md`](lab/2026-08-28-enclosure-board-measurements.md).
+- The board outline, thickness and parts come from the manufacturer STEP (2026-09-23, `../cad/board_holyiot_25008.py`). The holder (Ø21 × 4.0 mm) and the total stack height remain operator caliper readings with one unresolved ambiguity: [`docs/lab/2026-08-28-enclosure-board-measurements.md`](lab/2026-08-28-enclosure-board-measurements.md).
 
 ---
 
@@ -21,10 +24,10 @@ This document specifies the mechanical design criteria, material selection, seal
 +-----------------------------------------------------------------------------+
 |                            O31.94                                           |
 |              +------------------------------+   Transparent PETG cap        |
-|              | ---  O16 LED window  ---     |   foam recess 0.30            |
+|              | ---  clear LED ring  ---     |   foam recess 0.30            |
 |         =====+==============================+=====  ceiling z=6.60          |
-|              | :::                :::       |   foam RING OD25/ID16 x 1.0   |
-|              | ####### PCB O25 ####### z=6.0|   <-- LED faces the cap, i.e. |
+|              | :::                :::       |   foam RING OD16/ID12 x 2.0   |
+|              | ###### PCB O25 ####### z=4.81|   <-- LED faces the cap, i.e. |
 |         O----+ ####################### z=4.0+----O   away from the bird     |
 |              |***+--------------------+*****|   O-ring ID 26.74 x CS 1.5    |
 |              |***|  CR2032 + holder   |*****|   radial, seals on r=13.70    |
@@ -65,7 +68,8 @@ This document specifies the mechanical design criteria, material selection, seal
   on 2026-09-10 after caps tore along it; see
   [`DESIGN.md`](../DESIGN.md#9-bayonet-not-a-thread) decision 9 and
   [`docs/lab/2026-09-10-thread-print-failure.md`](lab/2026-09-10-thread-print-failure.md).
-  UNVERIFIED in print.
+  The coupon pair and four per-hen caps are printed and fitted; sealing is
+  UNVERIFIED.
 - **Target Ingress Rating**: Realistic IP54-level dust and splash protection.
   No certified ingress rating is claimed, and none has been tested.
 
@@ -98,28 +102,29 @@ To protect bare board traces from moisture condensation and corrosive ammonia va
 - Holyiot 25008 board with CR2032 battery holder physically observed on test bench.
 - PCB and holder are **internally tangent**: the cell edge is flush with the PCB edge at one point. Confirmed geometrically from the reported Ø25 and Ø21 diameters (2.00 mm centre offset, 0.0000 mm edge gap).
 - **Revision A printed on a Bambu Lab P1S — dimensions good; its thread mated on that pair.** The thread has since been replaced by the revision C bayonet after later caps tore along it (`docs/lab/2026-09-10-thread-print-failure.md`). See [`docs/lab/2026-08-28-enclosure-print-trial.md`](lab/2026-08-28-enclosure-print-trial.md).
-- Revision B geometry is watertight and assembles without interference — 29
-  machine checks in `../cad/verify.py`, all passing, and all four parts slice clean
-  in Bambu Studio. Its printed body accepted the board in the intended
-  component-up orientation. The revision B cap, sealed assembly and load path
-  remain physically untested.
+- The current geometry is watertight and assembles without interference — 40
+  machine checks in `../cad/verify.py` (49 with `--board-step`), all passing;
+  all four parts sliced clean in Bambu Studio on 2026-09-10 (`../DESIGN.md`,
+  Verification Performed). The revision B printed body
+  accepted the board in the intended component-up orientation. The O-ring
+  seal, sealed assembly and load path remain physically untested.
 
 ### Key Decisions
 - Two-part transparent PETG bayonet cap with a **radial** NBR O-ring (ID 26.74 × CS 1.50 mm). The 30 × 2 mm face-seal ring is superseded.
 - Closure positioned below the seal, so the cap can actually be assembled and the O-ring never crosses it. Revision C's closure is a bayonet; the thread it replaced tore in print.
 - **Holder faces down toward the harness, PCB faces up.** The LED is on the PCB and must be readable through the cap rather than pointed at the bird.
 - **Fill around the cell** so the body itself retains the holder: 100 % of the holder circumference is backed by fill or by the cavity wall.
-- Board clamped by a foam **ring** (OD 25 × ID 16 × 1.0 mm) on the PCB rim, leaving a Ø16 LED window. Ring, not disc, so the LED stays visible.
+- Board held by a 2.0 mm closed-cell foam **ring** (OD 16 × ID 12 mm) under the cap's core disc, bearing on the board's r 6–8 zone. The centre switch S1 sits inside its hole, and the LED (r 8.78–10.91) stays outside it, under the clear LED ring (r 8.5–11.5).
 - **Harness moved to in-plane side tabs**; the underside is now completely flat and the assembled height dropped from 11.50 mm to 8.70 mm.
 - Masked conformal coating applied before field deployment.
 - No antenna keep-out designed. The antenna could not be located, and inventing a zone would breach the no-invented-hardware rule.
 
 ### Open Questions & Next Steps
-1. **Print the revision C bayonet coupons, then the cap and complete assembly.** The body/board
-   fit is observed, but the model cannot prove cap fit, LED visibility through
-   the current clear-shell/inlay design, sealing, or that a tab survives an
-   elastic under load.
+1. **Print the complete assembly with the O-ring.** The coupon pair and four
+   per-hen caps are printed and fitted (lab notes 2026-09-10, 2026-10-09); the
+   model cannot prove LED visibility through the clear LED ring, sealing, or
+   that a tab survives an elastic under load.
 2. **Total stack height** in one caliper span, board bottom to seated cell top. Resolves the ambiguity the CAD currently assumes past.
-3. **Weigh the assembly**: bare board, holder, cell. Revision B models at 10.92 g against the ~10 g target, and about 1.0 g of that is estimated rather than measured.
+3. **Weigh the assembly**: bare board, holder, cell. The current model lands at 9.92 g against the ~10 g target, and about 1.2 g of that (board parts, holder, O-ring) is estimated rather than measured.
 4. **Source the O-ring** at ID 26.74 × CS 1.50 mm, or report the nearest stock size so the groove can be re-cut.
 5. **Elastic cross-section**: the tab slot is cut 8.8 × 1.8 mm on an assumption.

@@ -2,8 +2,8 @@
 // hashes, photo files and dimensions, required READMEs, BOM shape and build reports.
 // Erasable TypeScript only (Node runs this file with type stripping).
 import { createHash } from 'node:crypto';
-import { readdir, readFile, stat } from 'node:fs/promises';
-import { join } from 'node:path';
+import { readdir, readFile, realpath, stat } from 'node:fs/promises';
+import { join, sep } from 'node:path';
 import { projectSchema, maxFileBytes, type Photo, type Project } from '../../schema/project.ts';
 import { buildSchema, buildFilePattern } from '../../schema/build.ts';
 
@@ -72,10 +72,26 @@ async function checkPhoto(base: string, label: string, photo: Photo, fail: Fail)
   const hero = await readWebp(join(base, photo.src));
   if (!hero) { fail(`${label}: ${photo.src} is missing or not a WebP file`); return; }
   if (hero.width !== photo.width || hero.height !== photo.height) fail(`${label}: ${photo.src} is ${hero.width}x${hero.height}, project.json says ${photo.width}x${photo.height}`);
+  await checkSidecar(base, label, photo.src, fail);
   const thumbSrc = photo.src.slice(0, -heroSuffix.length) + thumbSuffix;
   const thumb = await readWebp(join(base, thumbSrc));
   if (!thumb) fail(`${label}: ${thumbSrc} is missing`);
   else if (thumb.width * 2 !== hero.width || thumb.height * 2 !== hero.height) fail(`${label}: ${thumbSrc} is ${thumb.width}x${thumb.height}, expected half of ${hero.width}x${hero.height}`);
+  await checkSidecar(base, label, thumbSrc, fail);
+}
+
+// Each served photo needs a <file>.json sidecar saying where the photo came from (npm run photo writes it).
+async function checkSidecar(base: string, label: string, src: string, fail: Fail): Promise<void> {
+  const sidecar = `${src}.json`;
+  let raw: string;
+  try { raw = await readFile(join(base, sidecar), 'utf8'); }
+  catch { fail(`${label}: ${sidecar} is missing`); return; }
+  let parsed: unknown;
+  try { parsed = JSON.parse(raw); }
+  catch (error) { fail(`${label}: ${sidecar} is not valid JSON: ${(error as Error).message}`); return; }
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) { fail(`${label}: ${sidecar} must be a JSON object`); return; }
+  const provenance = (parsed as { provenance?: unknown }).provenance;
+  if (typeof provenance !== 'string' || !provenance.trim()) fail(`${label}: ${sidecar} must contain a non-empty "provenance" string`);
 }
 
 async function readWebp(path: string): Promise<{ width: number; height: number } | undefined> {
@@ -123,12 +139,27 @@ async function checkBom(base: string, fail: Fail): Promise<void> {
   const lines = text.split(/\r?\n/).filter(line => line.trim());
   if (lines[0] !== bomHeader) { fail(`bom.csv: header must be "${bomHeader}"`); return; }
   const columns = bomHeader.split(',').length;
-  lines.slice(1).forEach((line, i) => {
+  for (const [i, line] of lines.slice(1).entries()) {
     const cells = parseCsvLine(line);
-    if (cells.length !== columns) { fail(`bom.csv row ${i + 2}: ${cells.length} columns, expected ${columns}`); return; }
-    const [ref, qty, itemHu, itemEn] = cells;
+    if (cells.length !== columns) { fail(`bom.csv row ${i + 2}: ${cells.length} columns, expected ${columns}`); continue; }
+    const [ref, qty, itemHu, itemEn, source] = cells;
     if (!ref.trim() || !qty.trim() || !itemHu.trim() || !itemEn.trim()) fail(`bom.csv row ${i + 2}: ref, qty, item_hu and item_en are required`);
-  });
+    await checkBomSource(base, i + 2, source, fail);
+  }
+}
+
+// A non-empty source is either an https:// URL or a relative path to a file or directory inside projects/<id>/.
+// Containment is checked on the resolved real path, so a symlink cannot point the source outside the project.
+async function checkBomSource(base: string, row: number, source: string, fail: Fail): Promise<void> {
+  const value = source.trim();
+  if (!value || value.startsWith('https://')) return;
+  if (value.startsWith('/')) { fail(`bom.csv row ${row}: source "${value}" must be a path relative to projects/<id>/`); return; }
+  if (value.split('/').includes('..')) { fail(`bom.csv row ${row}: source "${value}" must not contain ".."`); return; }
+  let target: string;
+  try { target = await realpath(join(base, value)); }
+  catch { fail(`bom.csv row ${row}: source "${value}" does not exist inside projects/<id>/`); return; }
+  const realBase = await realpath(base);
+  if (target !== realBase && !target.startsWith(realBase + sep)) fail(`bom.csv row ${row}: source "${value}" resolves outside projects/<id>/`);
 }
 
 async function checkBuilds(base: string, fail: Fail): Promise<void> {

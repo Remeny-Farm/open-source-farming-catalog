@@ -2,12 +2,12 @@
 
 The one new load-bearing part. A two-piece PETG ring that clips around the
 assembled tag, locks the cap against turning open, and carries the quarter-turn
-bayonet every accessory mounts on. Fits the unmodified Rev B tag.
+bayonet every accessory mounts on. Fits the current, unmodified tag.
 
 ## Cross-section (at a tab azimuth → window; elsewhere the wall is closed)
 
 ```
-                bayonet ring, 3 J-slots          crown deck z 8.85…10.05
+                bayonet ring, 3 J-slots          crown deck z 7.85…9.05
               ┌────┐                ┌────┐
               │    │   accessory    │    │       ← lugs twist in here
       ════════╪════╪════════════════╪════╪══════
@@ -68,8 +68,8 @@ anything that got past the accessory.
 | Bore over skirt | r 16.22 (fit 0.25) | same class as `fit_lug_r` |
 | Wall | 1.55 mm (r 16.22–17.77) | ≥3 perimeters at 0.4 nozzle |
 | Collar OD | **35.54 mm** | still inside the 40.14 tab span |
-| Height | z −0.60 → 11.65 (12.25 mm part) | bead zone to bayonet top; lowest point 0.40 above the floor plane |
-| Crown deck | z 8.85–10.05 (t 1.20) | 0.15 clearance over cap face |
+| Height | z −0.60 → 10.65 (11.25 mm part) | bead zone to bayonet top; lowest point 0.40 above the floor plane |
+| Crown deck | z 7.85–9.05 (t 1.20) | 0.15 clearance over cap face (z 7.70) |
 | Bayonet ring | r 16.2–17.8, 1.6 tall, on deck | see `accessories.md` |
 | Rim lip | inner r 15.55, 0.55 engagement, 0.60 t | over the rim bevel |
 | Windows | 2 ×, 13.40 wide, full height below deck | tab + elastic clearance |

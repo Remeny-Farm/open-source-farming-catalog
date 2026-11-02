@@ -32,10 +32,10 @@
     { "path": "source/cad/hen_tag_enclosure.py", "sha256": "b39e2c525f5ddbeb4c3fd1b5aca6e6fb272f9b24f3e078c3952586ed7a35692a", "role": "source" },
     { "path": "source/cad/cap_marking.py", "sha256": "3e4b872cd4c0121e20429d8e83ec2c2fedba770ec14058b1dca6b94716456525", "role": "source" },
     { "path": "source/cad/verify.py", "sha256": "40ae08c6e7851c3311f8ba03ed4398a261895b65c8bbd6126cc70b26b43eff3f", "role": "source" },
-    { "path": "source/README.md", "sha256": "dff9cc5db657073d766a0504ad862ba7a80897d9e523435fc2f65819d83d8123", "role": "documentation" },
-    { "path": "source/DESIGN.md", "sha256": "e70fd7ea481d887f6cffe52f86971eae7e17861d520dcfd0bd84c36097baf1f2", "role": "documentation" },
-    { "path": "source/docs/requirements.md", "sha256": "0b67781a3353aa98add54dcb61136ed0ed2a6bade58391ddc748d47f830c8333", "role": "documentation" },
-    { "path": "source/cad/README.md", "sha256": "628a1121b19c3533a3eae02f3d52ba5db4530fa2111aa437cf8c38e3d385ff8c", "role": "documentation" },
+    { "path": "source/README.md", "sha256": "dd6d29bee61fdf1c2638ab33e434440ce93d89bbe7bd36c4fe206bcff7195405", "role": "documentation" },
+    { "path": "source/DESIGN.md", "sha256": "3093face070ad330d50b6bfbd26a18d02810b4886e9b9b017b85cbf6a0019905", "role": "documentation" },
+    { "path": "source/docs/requirements.md", "sha256": "f1e65a7d45eca5cefd874c529cde3cbfbe38bf99c7386cc4b36c1d5009d7e39b", "role": "documentation" },
+    { "path": "source/cad/README.md", "sha256": "9b6943b1d381f1d8e8e7f90bd11414fc132e7a67031006e7270a1af3323453fc", "role": "documentation" },
     { "path": "source/docs/lab/2026-08-28-enclosure-board-measurements.md", "sha256": "3e96ea66f1097c2d11958c45999db62c381f73b13f08595b9cfbc3f3e2d29b26", "role": "evidence" },
     { "path": "source/docs/lab/2026-08-28-enclosure-print-trial.md", "sha256": "5f6f72452cbf9bbc037ccffa17a7c05e1695443dac6ee4a96bf2d4017d3e2bbb", "role": "evidence" },
     { "path": "source/docs/lab/2026-08-30-enclosure-led-window.md", "sha256": "b0655c5f051f08351315a868324fecb9ba6e9cae899720a2a0bb41bc340cc0f9", "role": "evidence" },
@@ -43,7 +43,9 @@
     { "path": "source/docs/lab/2026-09-14-cap-batch-plate.md", "sha256": "6b7e1ce56e1f96db75556afdb303572086e48b98f64790c83a497784a8ab5645", "role": "evidence" },
     { "path": "source/docs/lab/2026-09-29-cap-plate-filament-slots.md", "sha256": "b062807b2267c69eef0dde2e4d1a344ec4a493c2235982023e256b26427a9ee6", "role": "evidence" },
     { "path": "source/docs/lab/2026-09-30-cap-plate-floating-caps.md", "sha256": "464db7bb43de60a9f5088b47c878dc040e803b823e81204acebc75f334d3a4c8", "role": "evidence" },
-    { "path": "source/docs/lab/2026-10-09-cap-rest-angle.md", "sha256": "a0379b98f1cb5ee987ca4a17b437384d5375d6a916c63537d77181040ade99a2", "role": "evidence" }
+    { "path": "source/docs/lab/2026-10-04-cap-face-first-layer.md", "sha256": "713cb65efb653f8a39124a4030d206715950da2396e4de082fead2eea9c61f4e", "role": "evidence" },
+    { "path": "source/docs/lab/2026-10-09-cap-rest-angle.md", "sha256": "a0379b98f1cb5ee987ca4a17b437384d5375d6a916c63537d77181040ade99a2", "role": "evidence" },
+    { "path": "source/docs/lab/2026-10-12-cap-plate-engineering-plate.md", "sha256": "b969940fdb3d4f67a68c7d7e2d54c19ed24e41288f343f9e340597f9818c5eb1", "role": "evidence" }
   ],
   "links": [
     { "kind": "printables", "url": "https://www.printables.com/model/1852118-holyiot-25008-enclosure-nrf54l15-cr2032" },
@@ -59,7 +61,7 @@
     }
   },
   "limitations": {
-    "hu": "Az illesztési próbadarabok elkészültek, a méretek jók. A teljes zárt tokot, az O-gyűrűs tömítést és a vízállóságot még nem teszteltük. Vezető vagy szénszálas filament tilos: elhangolja az antennát, és rövidzárat okozhat.",
-    "en": "The fit coupons have been printed and the dimensions are good. The complete sealed enclosure, the O-ring seal and water resistance are untested. No conductive or carbon-fibre filament: it detunes the antenna and can cause a short."
+    "hu": "Az illesztési próbadarabok, a tyúkonkénti kupaktáblák (a 2026-10-04-i négykupagos próbanyomtatást 2026-10-12-n elfogadtuk) és egy 25°-kal elfordított körmű ház (2026-10-12) kinyomtatásra kerültek. A teljes zárt tok, az O-gyűrűs tömítés, a vízállóság és a hámmal a fülekre ható terhelés nincs tesztelve, és tyúk még nem viselte. Vezető vagy szénszálas filament tilos: elhangolja az antennát, és rövidzárat okozhat.",
+    "en": "The fit coupons, the per-hen cap plates (the 2026-10-04 four-cap test plate was accepted on 2026-10-12) and a body with the 25°-turned lugs (2026-10-12) have been printed. The complete sealed enclosure, the O-ring seal, water resistance and the harness tabs under load are untested, and no hen has worn one. No conductive or carbon-fibre filament: it detunes the antenna and can cause a short."
   }
 }

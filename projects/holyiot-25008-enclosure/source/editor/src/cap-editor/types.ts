@@ -36,7 +36,17 @@ export type CatalogEntry = { id: string; name: { hu: string; en: string }; pack?
 
 export type WalletView = { balance: bigint };
 
-export type ClientErrorCode = 'INSUFFICIENT_GRAIN' | 'DESIGN_BATCHED' | 'CATALOG_MISMATCH' | 'NOT_EDITABLE';
+// Every code the client seam may reject with; unknown codes (a Node system
+// error like ECONNREFUSED, a PostgREST PGRST301) are not ClientErrors.
+const CLIENT_ERROR_CODES = [
+  'INSUFFICIENT_GRAIN',
+  'DESIGN_BATCHED',
+  'CATALOG_MISMATCH',
+  'SCHEME_RETIRED',
+  'NOT_EDITABLE',
+  'UNKNOWN',
+] as const;
+export type ClientErrorCode = (typeof CLIENT_ERROR_CODES)[number];
 export type ClientError = { code: ClientErrorCode };
 
 // The only seam between the editor and chirp: the prototype ships an
@@ -98,10 +108,12 @@ export type CapEditorCopy = {
   summaryLabel: string;
   loading: string;
   continueLabel: string;
+  // Badge on a retired scheme shown only because the design already carries it.
+  retiredBadge: string;
 };
 
 export function isClientError(e: unknown): e is ClientError {
-  return typeof e === 'object' && e !== null && typeof (e as ClientError).code === 'string';
+  return typeof e === 'object' && e !== null && CLIENT_ERROR_CODES.includes((e as ClientError).code);
 }
 
 export function defaultColours(catalog: Catalog): ZoneColours {
@@ -117,6 +129,13 @@ export function pairedZone(catalog: Catalog, zone: ZoneId): ZoneId | null {
 
 export function findEntry(list: readonly CatalogEntry[], id: string | null): CatalogEntry | null {
   return id === null ? null : (list.find((e) => e.id === id) ?? null);
+}
+
+// A retired scheme is no longer offered for a new design (cad/cap_design.py):
+// caps already locked on it are still printed, but it cannot be saved again.
+export function isRetiredScheme(catalog: Catalog, id: string): boolean {
+  const s = catalog.schemes.find((x) => x.id === id);
+  return s !== undefined && 'retired' in s && s.retired === true;
 }
 
 // Golden Grain charged at lock: scheme + icon + centre pattern + band.

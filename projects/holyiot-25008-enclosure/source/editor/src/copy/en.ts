@@ -45,6 +45,7 @@ export const en = {
     summaryLabel: 'Your cap',
     loading: 'Fetching your cap\u2026',
     continueLabel: 'Next',
+    retiredBadge: 'No longer offered',
     noneOption: 'None',
     free: 'Free',
     lock: 'Lock design',
@@ -69,7 +70,9 @@ export const en = {
       INSUFFICIENT_GRAIN: 'Not enough Golden Grain.',
       DESIGN_BATCHED: 'This cap is already in a print batch.',
       CATALOG_MISMATCH: 'That combination is not available.',
+      SCHEME_RETIRED: 'This palette is no longer offered, so this cap cannot be edited again.',
       NOT_EDITABLE: 'This cap cannot be changed right now.',
+      UNKNOWN: 'Something went wrong. Please try again.',
     },
   } satisfies CapEditorCopy,
 };

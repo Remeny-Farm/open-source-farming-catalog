@@ -18,11 +18,13 @@ Three numbered steps in a segmented control (a real `tablist`): the order is
 real, not decoration — the palette decides which four filaments exist, so it
 comes first.
 
-1. **Palette** — three big cards (swatch, name, blurb, price). One decision,
-   plenty of room, the price stated up front.
+1. **Palette** — one big card per offered scheme (five today; a retired
+   scheme the cap already carries shows disabled with a badge): swatch, name,
+   blurb, price. One decision, plenty of room, the price stated up front.
 2. **Motif** — two rails, *Centre* and *Top band*, each split into the packs
-   Basic (free) / Vibe (30) / Drop (80, limited). Rails scroll sideways with
-   snap points, so 26 icons stay a thumb-flick away instead of a wall. The
+   Basic (free) / Vibe (50 per item) / Drop (300–1000 per item, limited).
+   Prices live in `data/catalog.json`. Rails scroll sideways with snap points,
+   so 34 icons stay a thumb-flick away instead of a wall. The
    chosen motif's **colour chips sit directly above its rail**, with the
    blocked chip crossed out and a one-line reason — the colour is found
    where the motif is chosen, not three screens later.
@@ -75,8 +77,8 @@ total, status and notes. Tested with accessible queries only.
 
 ## Mobile integration (packages/mobile-app)
 
-- The editor becomes a patron screen, e.g.
-  `packages/mobile-app/src/hen-profile/CapEditorScreen.tsx`, rendered inside
+- The editor becomes a patron screen, landed as
+  `packages/mobile-app/src/hen-cap/CapEditorScreen.tsx`, rendered inside
   the companion shell that already seeds the `--rc-*` vars. The screen wraps
   `CapEditor` and supplies the SDK-backed `CapDesignClient`, the hen from the
   route, `copy` from the app catalog and the locale.
@@ -117,9 +119,9 @@ one-line change on `.rc-shell` or on the cap page's wrapper. `clip` keeps the
 clipping without creating a scroll container and is supported by the
 WKWebView the app runs in.
 
-## Web route (apps/web/(patron))
+## Web route (apps/web/app/(patron)/account/cap)
 
-`apps/web/app/(patron)/my-hen/cap/page.tsx` renders the same component
+`apps/web/app/(patron)/account/cap/page.tsx` renders the same component
 inside `RealChickenShell` with `showHero={false}` (the cap is the hero). On
 ≥ 48em the layout goes two-column with the stage sticky on the left; the
 sheet becomes a centred card.

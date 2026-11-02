@@ -6,7 +6,9 @@ Kétrészes, átlátszó PETG tok a Holyiot 25008 BLE modulhoz (Nordic nRF54L15,
 
 - **C revízió.** A geometria parametrikus [build123d](https://build123d.readthedocs.io/) forrásból készül, gépi ellenőrzéssel, STEP és STL exporttal.
 - A C revízió illesztési próbadarabjait (ház és kupak) egyszer kinyomtattuk; a méretek jók.
-- A teljes zárt összeállítás, a radiális O-gyűrűs tömítés és a vízállóság **nincs tesztelve**. Az A revíziót Bambu Lab P1S nyomtatón kinyomtattuk és összeillesztettük; a menete később nyomtatáskor elszakadt, ezért bajonettzárra cseréltük (lásd a 2026-09-10-i laborjegyzetet).
+- A 2026-10-04-i négykupagos, tyúkonkénti próbanyomtatást 2026-10-12-n kinyomtattuk és elfogadtuk, a kupakok a házakra illeszkedtek (2026-10-12-i laborjegyzet).
+- A 25°-kal elfordított körmű házat 2026-10-12-én nyomtattuk; a rácsavart próbakupak a számával 6 óra helyzetben áll meg (2026-10-09-i laborjegyzet).
+- A teljes zárt összeállítás, a radiális O-gyűrűs tömítés, a vízállóság és a hámmal a fülekre ható terhelés **nincs tesztelve**, és tyúk még nem viselte. Az A revíziót Bambu Lab P1S nyomtatón kinyomtattuk és összeillesztettük; a menete később nyomtatáskor elszakadt, ezért bajonettzárra cseréltük (lásd a 2026-09-10-i laborjegyzetet).
 - Modellezett összeszerelt tömeg 9,92 g a 10 g-os célhoz képest; az elem, a tartó és az O-gyűrű tömege még becslés.
 - **Vezető vagy szénszálas filament tilos.** Elhangolja a 2,4 GHz-es antennát, és rövidre zárhatja a gombelem szabad érintkezőit.
 
@@ -32,6 +34,7 @@ Kétrészes, átlátszó PETG tok a Holyiot 25008 BLE modulhoz (Nordic nRF54L15,
 | Tyúkonkénti kupakgenerátor | `source/cad/cap_marking.py` |
 | Gépi ellenőrzések | `source/cad/verify.py` |
 | Anyagjegyzék | `bom.csv` |
+| Nyomtatási bizonyítékok (dátumozott laborjegyzetek) | `source/docs/lab/` |
 
 ## Megépítés
 

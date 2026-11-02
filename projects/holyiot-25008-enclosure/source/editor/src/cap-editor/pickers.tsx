@@ -8,6 +8,10 @@ export type SchemeCard = {
   title: string;
   blurb?: string;
   price: ReactNode;
+  // Set on a retired scheme shown only because the design already carries it:
+  // visible, but no longer a choice.
+  badge?: string;
+  disabled?: boolean;
   // Three filament hexes from the catalog (base, a, b): base ring around a
   // disc split into the two free colours. Data, not design literals.
   swatch: [string, string, string];
@@ -42,11 +46,12 @@ export function SchemeCards({ label, name, cards, value, onChange, disabled }: S
         {cards.map((c) => {
           const checked = c.id === value;
           return (
-            <label key={c.id} className="rc-cap-card rc-cap-press" data-checked={checked ? 'true' : undefined}>
-              <input type="radio" name={name} className="rc-cap-sr-only" checked={checked} onChange={() => onChange(c.id)} aria-label={c.title} />
+            <label key={c.id} className="rc-cap-card rc-cap-press" data-checked={checked ? 'true' : undefined} data-disabled={c.disabled ? 'true' : undefined}>
+              <input type="radio" name={name} className="rc-cap-sr-only" checked={checked} disabled={c.disabled} onChange={() => onChange(c.id)} aria-label={c.title} />
               <Swatch base={c.swatch[0]} a={c.swatch[1]} b={c.swatch[2]} />
               <span className="rc-cap-card__text">
                 <span className="rc-cap-card__title">{c.title}</span>
+                {c.badge ? <span className="rc-cap-card__badge">{c.badge}</span> : null}
                 {c.blurb ? <span className="rc-cap-card__blurb">{c.blurb}</span> : null}
               </span>
               <span className="rc-cap-card__price">{c.price}</span>

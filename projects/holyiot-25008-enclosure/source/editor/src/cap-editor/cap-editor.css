@@ -365,6 +365,13 @@
 
 .rc-cap-card__title { font-weight: var(--rc-weight-bold); }
 
+.rc-cap-card__badge {
+  color: color-mix(in srgb, var(--rc-ink) 70%, var(--rc-paper));
+  font-size: var(--rc-font-small-size);
+}
+
+.rc-cap-card[data-disabled='true'] { opacity: 0.6; cursor: default; }
+
 .rc-cap-card__blurb {
   color: color-mix(in srgb, var(--rc-ink) 80%, var(--rc-paper));
   font-size: var(--rc-font-small-size);

@@ -3,6 +3,7 @@ name: Release project bundle
 # Tag "<project-id>/<version>" (pushed by a maintainer) publishes an immutable zip of
 # projects/<id>/ with its sha256 as a GitHub Release. Tag names reach the shell only through
 # $GITHUB_REF_NAME, never through expression interpolation.
+# Process: README.md "Releases" and AGENTS.md "Landing". Agents never create or push tags.
 on:
   push:
     tags: ['*/*']
@@ -20,7 +21,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: 26.8.2
+          node-version: 26.12.1
           cache: npm
       - run: npm ci
       - run: npm run validate
