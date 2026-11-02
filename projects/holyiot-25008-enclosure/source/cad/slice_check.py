@@ -47,6 +47,24 @@ MACHINE = PROFILES / "machine/Bambu Lab P1S 0.4 nozzle.json"
 PROCESS = "0.16mm Optimal @BBL X1C"
 FILAMENT = PROFILES / "filament/Bambu PETG Basic @BBL X1C.json"
 
+# Log lines Bambu Studio writes at [error] level that are informational
+# notes, not failed toolpaths. `Reversing even wall line ...` is Arachne
+# reporting that it reversed a closed even-width wall loop to keep its
+# orientation consistent; the plate still slices and exports normally. Seen
+# on cap serial 543 (heart icon, dots band) in batch 2026-11-01-eggshell-02,
+# where every other gate held (36 objects, all four slots extruded and AMS
+# loaded, no cantilever). Any other [error] line still fails the check.
+KNOWN_SLICER_NOTES = ("Reversing even wall line causes it to be printed CCW instead of CW",)
+
+
+def slicer_error_lines(log: str) -> list[str]:
+    """Slicer log lines that fail a plate or a part, known notes excluded."""
+    return [ln.strip()[:100] for ln in log.splitlines()
+            if re.search(r"floating cantilever|CRITICAL|\[error\]", ln, re.I)
+            and "[WARNING]" not in ln and "no filament colors" not in ln
+            and not any(note in ln for note in KNOWN_SLICER_NOTES)]
+
+
 # The three settings that make the bayonet print clean. Everything else is the
 # stock Bambu profile.
 RECOMMENDED = {
@@ -216,9 +234,7 @@ def main() -> int:
         g = work / "plate_1.gcode"
         text = g.read_text(errors="replace") if g.exists() else ""
         n_obj = len(set(re.findall(r"; OBJECT_ID: (\d+)", text)))
-        warn = [ln.strip()[:100] for ln in log.splitlines()
-                if re.search(r"floating cantilever|CRITICAL|\[error\]", ln, re.I)
-                and "[WARNING]" not in ln and "no filament colors" not in ln]
+        warn = slicer_error_lines(log)
         est = re.search(r"; total estimated time: (.+)", text)
         m = re.search(r"max_cantilever_dist=([\d.]+)", log)
         # Every slot a part is assigned to must extrude, and the AMS must load
@@ -257,9 +273,7 @@ def main() -> int:
             shutil.rmtree(work, ignore_errors=True)
             work.mkdir(parents=True)
         gcode, log = slice_part(stl, overrides, work)
-        warn = [ln.strip()[:100] for ln in log.splitlines()
-                if re.search(r"floating cantilever|CRITICAL|\[error\]", ln, re.I)
-                and "[WARNING]" not in ln and "no filament colors" not in ln]
+        warn = slicer_error_lines(log)
         m = re.search(r"max_cantilever_dist=([\d.]+)", log)
         cant = float(m.group(1)) if m else 0.0
         if gcode is None:
