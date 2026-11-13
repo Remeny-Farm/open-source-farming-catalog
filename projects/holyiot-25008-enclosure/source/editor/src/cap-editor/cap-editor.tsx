@@ -147,8 +147,9 @@ export function CapEditor({ henId, client, catalog, layout, copy, walletCopy, lo
     setBusy(true);
     try {
       setDesign(await fn());
-      await refreshWallet();
       onDone?.();
+      // A failed balance read must not turn a committed mutation into an error.
+      await refreshWallet().catch(() => {});
     } catch (e) {
       say({ text: copy.errors[codeOf(e)], tone: 'error' });
     } finally {

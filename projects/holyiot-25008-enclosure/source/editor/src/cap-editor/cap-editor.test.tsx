@@ -86,6 +86,22 @@ test('insufficient grain shows the mapped error and stays a draft', async () => 
   expect(screen.getByText(en.capEditor.status.draft)).toBeInTheDocument();
 });
 
+test('a paid lock still celebrates when the following wallet refresh fails', async () => {
+  const client = createMockClient({ hens: [{ ...hen, scheme: 'emerald_gold' }], balance: 2000n, catalog });
+  let walletReads = 0;
+  setupWithClient({ ...client, getWallet: () => ++walletReads === 1 ? client.getWallet() : Promise.reject(new TypeError('fetch failed')) });
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole('button', { name: en.capEditor.lock }));
+  await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: en.capEditor.lockConfirm }));
+  expect(await screen.findByRole('status')).toHaveTextContent(en.capEditor.celebrate);
+  expect(screen.getByText(en.capEditor.status.locked)).toBeInTheDocument();
+  expect(screen.queryByRole('alert')).toBeNull();
+  expect(screen.queryByRole('dialog')).toBeNull();
+  expect(screen.getByRole('button', { name: /Edit again/ })).toBeEnabled();
+  expect(walletReads).toBe(2);
+  expect(client.state().balance).toBe(1500n);
+});
+
 test('a save that fails with a TypeError (network down) shows the generic error, not "cannot be changed"', async () => {
   setupWithClient({
     ...createMockClient({ hens: [hen], balance: 1000n, catalog }),
