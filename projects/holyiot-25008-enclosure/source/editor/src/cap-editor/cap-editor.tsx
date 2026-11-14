@@ -59,12 +59,15 @@ const centreValue = (d: Pick<CapDesign, 'icon' | 'centre'>): string | null =>
 export function CapEditor({ henId, client, catalog, layout, copy, walletCopy, locale }: CapEditorProps) {
   const [design, setDesign] = useState<CapDesign | null>(null);
   const [balance, setBalance] = useState<bigint | null>(null);
+  const [walletError, setWalletError] = useState(false);
+  const [walletRefreshing, setWalletRefreshing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<Message | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [step, setStep] = useState<Step>('palette');
   const [celebrateKey, setCelebrateKey] = useState(0);
   const saveSeq = useRef(0);
+  const walletSeq = useRef(0);
   const messageTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lang = langOf(locale);
   const armed = useArmedConfirm();
@@ -72,6 +75,10 @@ export function CapEditor({ henId, client, catalog, layout, copy, walletCopy, lo
   useEffect(() => {
     let alive = true;
     setDesign(null);
+    setBalance(null);
+    setWalletError(false);
+    setWalletRefreshing(false);
+    ++walletSeq.current;
     setMessage(null);
     setStep('palette');
     Promise.all([client.load(henId), client.getWallet()])
@@ -83,6 +90,7 @@ export function CapEditor({ henId, client, catalog, layout, copy, walletCopy, lo
       .catch((e: unknown) => alive && say({ text: copy.errors[codeOf(e)], tone: 'error' }, 0));
     return () => {
       alive = false;
+      ++walletSeq.current;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client, henId]);
@@ -104,7 +112,19 @@ export function CapEditor({ henId, client, catalog, layout, copy, walletCopy, lo
   const editable = design?.status === 'draft';
 
   async function refreshWallet(): Promise<void> {
-    setBalance((await client.getWallet()).balance);
+    const mine = ++walletSeq.current;
+    // A committed payment makes the previous balance unverified.
+    setBalance(null);
+    setWalletError(false);
+    setWalletRefreshing(true);
+    try {
+      const wallet = await client.getWallet();
+      if (mine === walletSeq.current) setBalance(wallet.balance);
+    } catch {
+      if (mine === walletSeq.current) setWalletError(true);
+    } finally {
+      if (mine === walletSeq.current) setWalletRefreshing(false);
+    }
   }
 
   // Optimistic: the stage answers the tap at once, the server's answer (or
@@ -149,7 +169,7 @@ export function CapEditor({ henId, client, catalog, layout, copy, walletCopy, lo
       setDesign(await fn());
       onDone?.();
       // A failed balance read must not turn a committed mutation into an error.
-      await refreshWallet().catch(() => {});
+      await refreshWallet();
     } catch (e) {
       say({ text: copy.errors[codeOf(e)], tone: 'error' });
     } finally {
@@ -375,6 +395,14 @@ export function CapEditor({ henId, client, catalog, layout, copy, walletCopy, lo
         </section>
 
         <BottomBar walletCopy={walletCopy} locale={locale} balance={balance} total={total} totalLabel={copy.summaryLabel} free={copy.free} message={message}>
+          {walletError ? (
+            <>
+              <p role="alert">{copy.walletUnavailable}</p>
+              <button type="button" className="rc-cap-btn rc-cap-btn--ghost rc-cap-press" disabled={busy || walletRefreshing} onClick={() => void refreshWallet()}>
+                {copy.refreshWallet}
+              </button>
+            </>
+          ) : null}
           {design.status === 'draft' ? (
             <>
               {nextStep ? (
@@ -382,7 +410,7 @@ export function CapEditor({ henId, client, catalog, layout, copy, walletCopy, lo
                   {copy.continueLabel}
                 </button>
               ) : null}
-              <button type="button" className="rc-cap-btn rc-cap-btn--primary rc-cap-press" onClick={() => setDialogOpen(true)} disabled={busy}>
+              <button type="button" className="rc-cap-btn rc-cap-btn--primary rc-cap-press" onClick={() => setDialogOpen(true)} disabled={busy || balance === null}>
                 {copy.lock}
               </button>
             </>
@@ -412,14 +440,14 @@ export function CapEditor({ henId, client, catalog, layout, copy, walletCopy, lo
         </BottomBar>
       </div>
 
-      {dialogOpen ? (
+      {dialogOpen && balance !== null ? (
         <LockDialog
           copy={copy}
           walletCopy={walletCopy}
           locale={locale}
           lines={lines}
           total={total}
-          balance={balance ?? 0n}
+          balance={balance}
           busy={busy}
           onCancel={() => setDialogOpen(false)}
           onConfirm={() =>

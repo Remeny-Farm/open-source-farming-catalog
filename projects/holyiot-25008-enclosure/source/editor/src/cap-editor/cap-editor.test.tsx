@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { en } from '../copy/en.js';
@@ -84,22 +84,60 @@ test('insufficient grain shows the mapped error and stays a draft', async () => 
   await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: en.capEditor.lockConfirm }));
   expect(await screen.findByRole('alert')).toHaveTextContent(en.capEditor.errors.INSUFFICIENT_GRAIN);
   expect(screen.getByText(en.capEditor.status.draft)).toBeInTheDocument();
+  expect(screen.getByLabelText('10 Golden Grain')).toBeInTheDocument();
 });
 
 test('a paid lock still celebrates when the following wallet refresh fails', async () => {
   const client = createMockClient({ hens: [{ ...hen, scheme: 'emerald_gold' }], balance: 2000n, catalog });
   let walletReads = 0;
-  setupWithClient({ ...client, getWallet: () => ++walletReads === 1 ? client.getWallet() : Promise.reject(new TypeError('fetch failed')) });
+  setupWithClient({ ...client, getWallet: () => ++walletReads === 2 ? Promise.reject(new TypeError('fetch failed')) : client.getWallet() });
   const user = userEvent.setup();
   await user.click(await screen.findByRole('button', { name: en.capEditor.lock }));
   await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: en.capEditor.lockConfirm }));
   expect(await screen.findByRole('status')).toHaveTextContent(en.capEditor.celebrate);
   expect(screen.getByText(en.capEditor.status.locked)).toBeInTheDocument();
-  expect(screen.queryByRole('alert')).toBeNull();
+  expect(screen.queryByLabelText('2,000 Golden Grain')).toBeNull();
+  expect(screen.getByRole('alert')).toHaveTextContent('Balance unavailable. Refresh to see your balance.');
   expect(screen.queryByRole('dialog')).toBeNull();
   expect(screen.getByRole('button', { name: /Edit again/ })).toBeEnabled();
   expect(walletReads).toBe(2);
   expect(client.state().balance).toBe(1500n);
+  await user.click(screen.getByRole('button', { name: 'Refresh balance' }));
+  expect(await screen.findByLabelText('1,500 Golden Grain')).toBeInTheDocument();
+  expect(screen.queryByRole('alert')).toBeNull();
+  expect(screen.getByRole('status')).toHaveTextContent(en.capEditor.celebrate);
+  expect(walletReads).toBe(3);
+});
+
+test('a wallet retry cannot overwrite a newly selected client balance', async () => {
+  const client = createMockClient({ hens: [{ ...hen, scheme: 'emerald_gold' }], balance: 2000n, catalog });
+  let walletReads = 0;
+  let finishRead!: (wallet: { balance: bigint }) => void;
+  const pendingWallet = new Promise<{ balance: bigint }>((resolve) => { finishRead = resolve; });
+  const failingClient = {
+    ...client,
+    getWallet: () => {
+      ++walletReads;
+      if (walletReads === 2) return Promise.reject(new TypeError('fetch failed'));
+      return walletReads === 3 ? pendingWallet : client.getWallet();
+    },
+  };
+  const editor = (c: CapDesignClient) => (
+    <CapEditor henId="h1" client={c} catalog={catalog} layout={layout} copy={en.capEditor} walletCopy={en.wallet} locale="en-US" />
+  );
+  const view = render(editor(failingClient));
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole('button', { name: en.capEditor.lock }));
+  await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: en.capEditor.lockConfirm }));
+  await user.click(await screen.findByRole('button', { name: 'Refresh balance' }));
+  expect(screen.queryByLabelText('2,000 Golden Grain')).toBeNull();
+
+  const otherClient = createMockClient({ hens: [hen], balance: 9000n, catalog });
+  view.rerender(editor(otherClient));
+  expect(await screen.findByLabelText('9,000 Golden Grain')).toBeInTheDocument();
+  await act(async () => { finishRead({ balance: 1500n }); });
+  expect(screen.getByLabelText('9,000 Golden Grain')).toBeInTheDocument();
+  expect(screen.queryByLabelText('1,500 Golden Grain')).toBeNull();
 });
 
 test('a save that fails with a TypeError (network down) shows the generic error, not "cannot be changed"', async () => {
