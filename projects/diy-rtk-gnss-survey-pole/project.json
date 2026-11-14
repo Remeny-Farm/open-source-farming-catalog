@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 2,
+  "id": "diy-rtk-gnss-survey-pole",
+  "title": {
+    "hu": "Saját összeállítású RTK GNSS mérőrúd (simpleRTK2B, ZED-F9P)",
+    "en": "DIY RTK GNSS survey pole (simpleRTK2B, ZED-F9P)"
+  },
+  "description": {
+    "hu": "Kb. 250 eurós RTK mérőeszköz kereskedelmi simpleRTK2B készletből (u-blox ZED-F9P), farúdon, Android-telefonnal és SW Mapsszel. A korrekciót az ingyenes Centipede hálózat adja NTRIP-en, saját bázis nélkül. Drónos felmérés illesztőpontjainak bemérésére használtuk.",
+    "en": "An RTK survey tool for about €250, built from a commercial simpleRTK2B kit (u-blox ZED-F9P) on a wooden pole, with an Android phone running SW Maps. Corrections come from the free Centipede network over NTRIP, with no base station of your own. Used to survey ground control points for a drone survey."
+  },
+  "category": "electronics",
+  "stage": "field-tested",
+  "version": "2026-09-22",
+  "topics": ["tools", "water"],
+  "requires": ["microcontroller-flashing"],
+  "maintainers": [
+    { "name": "Levente Plicher", "url": "https://github.com/leventeplicher" }
+  ],
+  "licenses": [
+    { "identifier": "CC-BY-SA-4.0" }
+  ],
+  "files": [
+    { "path": "bom.csv", "sha256": "c0d308848272776090f4acae5e29cde3d7e495b4d8d5a3ce170669b462275a9c", "role": "bom" },
+    { "path": "docs/2026-09-22-gcp-survey.md", "sha256": "56da374531e8b5a1aa3c8f8c33550371e17f41bd01166668a41dd5749f526145", "role": "evidence" }
+  ],
+  "photo": {
+    "src": "photos/diy-rtk-gnss-survey-pole-1200.webp",
+    "width": 1200,
+    "height": 900,
+    "alt": {
+      "hu": "A szerző függőlegesen tartja a kb. 2 méteres farudat egy száraz, dombos legelőn; a rúd tetején az antenna, középen a telefon és a vevő doboza.",
+      "en": "The maintainer holds the roughly 2 m wooden pole upright on a dry, hilly pasture; the antenna is at the top, the phone and the receiver box halfway down."
+    }
+  },
+  "gallery": [
+    {
+      "src": "photos/diy-rtk-gnss-survey-pole-receiver-1200.webp",
+      "width": 1200,
+      "height": 900,
+      "alt": {
+        "hu": "A rúd középső része: felül az SW Mapset futtató telefon, alatta a mágneses vízmérték, legalul a vevőt rejtő fekete doboz, a háttérben legelő.",
+        "en": "The middle of the pole: the phone running SW Maps at the top, the magnetic spirit level below it and the black box holding the receiver at the bottom, with pasture behind."
+      }
+    },
+    {
+      "src": "photos/diy-rtk-gnss-survey-pole-antenna-1200.webp",
+      "width": 1200,
+      "height": 900,
+      "alt": {
+        "hu": "A farúd teteje kék ég előtt: a rúd végére rögzített lapon ül a fekete GNSS-antenna.",
+        "en": "The top of the wooden pole against a blue sky: the black GNSS antenna sits on a plate fixed to the end of the pole."
+      }
+    },
+    {
+      "src": "photos/diy-rtk-gnss-survey-pole-gcp-1200.webp",
+      "width": 1200,
+      "height": 900,
+      "alt": {
+        "hu": "A rúd alsó vége egy fűbe fektetett, nyilakkal megjelölt kartonlap közepén, az illesztőpont fölött.",
+        "en": "The foot of the pole at the centre of a cardboard target marked with arrows, laid in the grass over the control point."
+      }
+    }
+  ],
+  "limitations": {
+    "hu": "Egy terepnapon (2026-09-22) öt illesztőpontot mértünk vele. Ismert koordinátájú alapponton nem ellenőriztük, a 0,194 m-es RMSE a drónmodellre vonatkozik, nem a vevőre. A magasságok ellipszoidiak (geoid nélkül), a vevő konfigurációját nem mentettük (a firmware-frissítéshez Windowsos gép kell, a telefonos rész csak Androiddal működik), a doboz esőállóságát nem teszteltük. A pontosság a bázis távolságától, a mobilnettől és a szabad égbolttól függ. Légvezeték közelében és zivatarban ne használd: a 2 m-es rúd billentve vezetékbe érhet.",
+    "en": "Used on one field day (2026-09-22) to measure five control points. Not checked against a benchmark with known coordinates; the 0.194 m RMSE describes the drone model, not the receiver. Heights are ellipsoidal (no geoid), the receiver configuration was not saved (the firmware update needs a Windows PC, the phone side works with Android only) and the box has not been tested in rain. Accuracy depends on the base distance, mobile data and open sky. Do not use near power lines or in a thunderstorm: the 2 m pole can reach a line when tipped."
+  }
+}
