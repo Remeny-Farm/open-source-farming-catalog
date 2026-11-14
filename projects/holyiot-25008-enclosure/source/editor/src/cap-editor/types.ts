@@ -105,6 +105,8 @@ export type CapEditorCopy = {
   perItemTemplate: string; // "{amount}"
   autoFixTemplate: string; // "{zone}"
   celebrate: string;
+  walletUnavailable: string;
+  refreshWallet: string;
   summaryLabel: string;
   loading: string;
   continueLabel: string;

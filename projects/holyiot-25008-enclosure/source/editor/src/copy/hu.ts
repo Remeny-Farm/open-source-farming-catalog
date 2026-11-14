@@ -41,6 +41,8 @@ export const hu = {
     perItemTemplate: '{amount} / darab',
     autoFixTemplate: 'A(z) {zone} másik színre lépett, hogy látható maradjon.',
     celebrate: 'Rögzítve! A kupakod sorban áll a következő nyomtatásra.',
+    walletUnavailable: 'Az egyenleg nem érhető el. Frissítsd az egyenleg megtekintéséhez.',
+    refreshWallet: 'Egyenleg frissítése',
     summaryLabel: 'A kupakod',
     loading: 'Hozzuk a kupakodat\u2026',
     continueLabel: 'Tovább',

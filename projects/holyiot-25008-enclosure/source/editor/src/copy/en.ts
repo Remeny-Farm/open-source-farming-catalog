@@ -42,6 +42,8 @@ export const en = {
     perItemTemplate: '{amount} each',
     autoFixTemplate: 'The {zone} moved to another colour so it stays visible.',
     celebrate: 'Locked! Your cap is in the queue for the next print.',
+    walletUnavailable: 'Balance unavailable. Refresh to see your balance.',
+    refreshWallet: 'Refresh balance',
     summaryLabel: 'Your cap',
     loading: 'Fetching your cap\u2026',
     continueLabel: 'Next',
