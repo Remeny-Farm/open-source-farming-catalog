@@ -24,6 +24,9 @@
     { "path": "bom.csv", "sha256": "c0d308848272776090f4acae5e29cde3d7e495b4d8d5a3ce170669b462275a9c", "role": "bom" },
     { "path": "docs/2026-09-22-gcp-survey.md", "sha256": "56da374531e8b5a1aa3c8f8c33550371e17f41bd01166668a41dd5749f526145", "role": "evidence" }
   ],
+  "links": [
+    { "kind": "repository", "url": "https://github.com/Remeny-Farm/open-source-farming-catalog/tree/main/projects/diy-rtk-gnss-survey-pole" }
+  ],
   "photo": {
     "src": "photos/diy-rtk-gnss-survey-pole-1200.webp",
     "width": 1200,
