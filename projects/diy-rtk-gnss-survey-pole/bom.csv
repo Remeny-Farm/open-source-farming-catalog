@@ -1,0 +1,9 @@
+ref,qty,item_hu,item_en,source,notes
+GNSS,1,"simpleRTK2B Basic Starter Kit: simpleRTK2B Budget vevőpanel (u-blox ZED-F9P) és u-blox ANN-MB-00 kétsávos GNSS-antenna 5 m kábellel","simpleRTK2B Basic Starter Kit: simpleRTK2B Budget receiver board (u-blox ZED-F9P) and u-blox ANN-MB-00 dual-band GNSS antenna with 5 m cable",https://www.ardusimple.com/product/simplertk2b-basic-starter-kit-ip65/,commercial kit; the bulk of the cost
+BOX,1,Vízálló ABS villanyszerelési doboz,Waterproof ABS electrical enclosure,,houses the receiver board; size and IP rating of the built example not recorded
+PLATE,1,Lapos szerelőlap (80 × 80 mm),Flat mounting plate (80 × 80 mm),,the antenna sits on it at the top of the pole; bought as a 6-pack
+STRAP,3,Erős tépőzáras rögzítőpánt,Heavy-duty hook-and-loop cinch strap,,hold the box and the cables on the pole; count on the built example not recorded
+USB,1,"USB-kábel, 2 m (USB-A – USB-C)","USB cable, 2 m (USB-A to USB-C)",,"receiver to phone; worked directly with an Android phone, no adapter; SW Maps over USB is Android only"
+LEVEL,1,Mágneses dobozos vízmérték (kb. 23 cm),Magnetic box spirit level (about 23 cm),,keeps the pole vertical over the point
+POLE,1,"Egyenes farúd, kb. 2 m","Straight wooden pole, about 2 m",,the antenna height (2.04 m on the built example) must be measured on your own pole
+PHONE,1,Android-telefon SW Maps alkalmazással,Android phone with SW Maps,,not counted in the cost; needs mobile data for NTRIP
