@@ -1,0 +1,15 @@
+# Repo-own labels of Remeny-Farm/open-source-farming-catalog. One name per
+# line. The shared registry (~/.claude/skills/ship/labels.json) defines every
+# other label; the daily labels sync never changes a name listed here.
+
+# Set by every issue form: a community submission (build report, fix or new design).
+submission
+
+# Set by the "I built this" form (.github/ISSUE_TEMPLATE/build-report.yml).
+build-report
+
+# Set by the "Fix an existing design" form (.github/ISSUE_TEMPLATE/fix-design.yml).
+fix
+
+# Set by the "New design" form (.github/ISSUE_TEMPLATE/new-design.yml).
+new-design

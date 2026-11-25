@@ -1,7 +1,7 @@
 name: Fix an existing design / Meglévő terv javítása
 description: Translation, corrected limitation, stage update with evidence, new file version or photo. / Fordítás, pontosított korlát, állapotfrissítés bizonyítékkal, új fájlverzió vagy fotó.
 title: "[fix] "
-labels: ["submission", "fix"]
+labels: ["submission", "fix", "enhancement", "manual", "triaged"]
 body:
   - type: input
     id: project
@@ -19,16 +19,23 @@ body:
     validations:
       required: true
   - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Probléma
+      description: What is wrong or missing today, and where. / Mi hibás vagy hiányzik most, és hol.
+    validations:
+      required: true
+  - type: textarea
     id: change
     attributes:
-      label: The change / A változtatás
+      label: Expected, the change / Elvárt állapot, a változtatás
       description: Say exactly what should read differently, or attach the new files. / Írd le pontosan, minek kell másképp szerepelnie, vagy csatold az új fájlokat.
     validations:
       required: true
   - type: textarea
     id: evidence
     attributes:
-      label: Why, with evidence / Miért, bizonyítékkal
+      label: Evidence / Bizonyíték
       description: A stage change needs a photo, measurement or report. / Állapotváltáshoz fotó, mérés vagy jelentés kell.
     validations:
       required: true
