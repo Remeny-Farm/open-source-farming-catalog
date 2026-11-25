@@ -25,8 +25,8 @@ body:
   - type: textarea
     id: notes
     attributes:
-      label: What happened / Mi történt
-      description: Printer or tools, material, what fit and what did not, what you changed. / Nyomtató vagy szerszámok, anyag, mi illeszkedett és mi nem, mit változtattál.
+      label: Problem / Probléma
+      description: Tell us how the build went, even if nothing went wrong. Include printer or tools, material, what fit and what did not, and what you changed. / Írd le, hogyan sikerült az építés, akkor is, ha nem volt gond. Add meg a nyomtatót vagy a szerszámokat, az anyagot, mi illeszkedett és mi nem, és min változtattál.
     validations:
       required: true
   - type: textarea
