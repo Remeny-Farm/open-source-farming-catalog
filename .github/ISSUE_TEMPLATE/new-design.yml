@@ -1,7 +1,7 @@
 name: New design / Új terv
 description: Submit a design without writing JSON. One language is enough; the reviewer adds the other. / Terv beküldése JSON-írás nélkül. Egy nyelv elég, a lektor hozzáteszi a másikat.
 title: "[design] "
-labels: ["submission", "new-design"]
+labels: ["submission", "new-design", "enhancement", "manual", "triaged"]
 body:
   - type: markdown
     attributes:
@@ -18,7 +18,7 @@ body:
   - type: textarea
     id: description
     attributes:
-      label: What it is and what problem it solves / Mi ez, és milyen problémát old meg
+      label: Problem it solves, and what the design is / Megoldott probléma, és mi a terv
       description: 2–5 sentences in Hungarian or English (both welcome). / 2–5 mondat magyarul vagy angolul (mindkettő jöhet).
     validations:
       required: true
@@ -85,7 +85,7 @@ body:
   - type: textarea
     id: photo
     attributes:
-      label: Photo of the real object / Fotó a valódi tárgyról
+      label: Evidence, photo of the real object / Bizonyíték, fotó a valódi tárgyról
       description: Drag a photo here (at least 1200 px wide, 4:3 preferred). Required for built and field-tested. / Húzd ide a fotót (legalább 1200 px széles, lehetőleg 4:3). built és field-tested esetén kötelező.
   - type: input
     id: credit

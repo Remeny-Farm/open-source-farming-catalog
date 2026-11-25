@@ -1,7 +1,7 @@
 name: I built this / Megépítettem
 description: Report a build of a listed design, with a photo. / Jelentés egy listázott terv megépítéséről, fotóval.
 title: "[build] "
-labels: ["submission", "build-report"]
+labels: ["submission", "build-report", "documentation", "manual", "triaged"]
 body:
   - type: input
     id: project
@@ -32,7 +32,7 @@ body:
   - type: textarea
     id: photo
     attributes:
-      label: Photo / Fotó
+      label: Evidence, photo of your build / Bizonyíték, fotó a megépített tárgyról
       description: Drag a photo of your build here (at least 1200 px wide). / Húzd ide a fotót (legalább 1200 px széles).
     validations:
       required: true
