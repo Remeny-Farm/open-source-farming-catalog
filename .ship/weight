@@ -1,0 +1,4 @@
+# Weight class (godavid/boss record 246, fleet ADR-0707): heavy | light. Missing or unknown = heavy.
+# light: the fleet nit-keeper lane merges its own nit/* fix PR on green checks, with no review round.
+# Only the owner sets this file (.ship/** is always risk:high). Owner decision 2026-11-25.
+light
